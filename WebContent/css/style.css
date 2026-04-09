@@ -1,0 +1,394 @@
+:root {
+    --bg: #0f172a;
+    --card-bg: rgba(30, 41, 59, 0.85);
+    --border: #334155;
+    --accent: #38bdf8;
+    --accent2: #7dd3fc;
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --error: #ef4444;
+    --radius: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 16px;
+    transition: background-image 1.2s ease;
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* Overlay scuro sopra immagine sfondo */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 0;
+}
+
+/* Tutto il contenuto sopra l'overlay */
+#root {
+    position: relative;
+    z-index: 1;
+}
+
+/* ── HEADER */
+header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+}
+
+header p {
+    color: var(--muted);
+    font-size: 1.1rem;
+}
+
+/* ── BARRA DI RICERCA */
+.search-box {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 16px 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 1.1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    backdrop-filter: blur(8px);
+}
+
+.search-box input:focus { border-color: var(--accent); }
+
+.search-box input::placeholder { color: var(--muted); }
+
+.search-box button {
+    padding: 16px 28px;
+    background: var(--accent);
+    color: #0f172a;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.search-box button:hover { background: var(--accent2); }
+.search-box button:active { transform: scale(0.97); }
+
+/* ── CRONOLOGIA */
+.history {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+    justify-content: center;
+}
+
+.history-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.history-item:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* ── ERRORE */
+.error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--error);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    color: var(--error);
+    margin-bottom: 16px;
+    font-size: 1rem;
+    text-align: center;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ── LOADER */
+.loader { text-align: center; padding: 60px; }
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── LAYOUT A 3 COLONNE */
+.main-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr 280px;
+    gap: 20px;
+    align-items: start;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ── CARD GENERICA (usata per card laterali e centrale) */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.4s ease;
+    transition: all 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── CARD LATERALI */
+.side-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.info-block:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.info-block .info-icon {
+    font-size: 2rem;
+    margin-bottom: 4px;
+}
+
+.info-block .info-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+}
+
+.info-block .info-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.info-block .info-sub {
+    font-size: 0.95rem;
+    color: var(--muted);
+}
+
+/* ── WEATHER CARD CENTRALE */
+.weather-card {
+    margin-bottom: 16px;
+}
+
+.city-name {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.city-name h2 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.city-name span {
+    color: var(--muted);
+    font-size: 1rem;
+}
+
+.main-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.main-info img { width: 80px; height: 80px; }
+
+.temperature {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.description {
+    text-transform: capitalize;
+    color: var(--muted);
+    margin-bottom: 24px;
+    font-size: 1.15rem;
+}
+
+.details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.detail-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detail-item span {
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.detail-item strong {
+    font-size: 1.1rem;
+}
+
+/* ── PREVISIONI 7 GIORNI */
+.forecast-strip {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.forecast-day {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: center;
+    cursor: pointer;
+    min-width: 85px;
+    backdrop-filter: blur(8px);
+    transition: border-color 0.2s, transform 0.15s, background 0.2s;
+    flex-shrink: 0;
+}
+
+.forecast-day:hover {
+    border-color: var(--accent);
+    transform: translateY(-3px);
+}
+
+.forecast-day.active {
+    border-color: var(--accent);
+    background: rgba(56, 189, 248, 0.12);
+}
+
+.forecast-day .day-name {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.forecast-day .day-temp-max {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.forecast-day .day-temp-min {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+/* ── GRAFICO */
+.chart-container {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    backdrop-filter: blur(8px);
+    animation: fadeIn 0.4s ease;
+}
+
+.chart-container h3 {
+    font-size: 1rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+/* ── RESPONSIVE — tablet */
+@media (max-width: 1024px) {
+    .main-layout {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+            "center center"
+            "left right";
+    }
+
+    .col-center { grid-area: center; }
+    .col-left   { grid-area: left; }
+    .col-right  { grid-area: right; }
+}
+
+/* ── RESPONSIVE — mobile */
+@media (max-width: 640px) {
+    header h1 { font-size: 2rem; }
+
+    .main-layout {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "center"
+            "left"
+            "right";
+    }
+
+    .temperature { font-size: 2.8rem; }
+    .city-name h2 { font-size: 1.6rem; }
+}

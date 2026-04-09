@@ -1,0 +1,30 @@
+# ── API KEYS E CONFIGURAZIONE SENSIBILE
+# Questo è il file più importante da escludere
+WebContent/WEB-INF/config.properties
+
+# ── BUILD
+# Cartella generata da Ant — non serve su GitHub
+build/
+
+# ── TOMCAT
+# File specifici del tuo PC — ogni sviluppatore ha il suo percorso
+build.properties
+
+# ── JAVA
+# File compilati
+*.class
+
+# ── SISTEMA OPERATIVO
+# File nascosti di Windows e Mac
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# ── IDE
+# File di configurazione VS Code e IntelliJ
+.vscode/
+.idea/
+*.iml
+
+# ── LOG
+*.log
