@@ -1,156 +1,209 @@
-# ☁ Weather App
+# 🌦️ Weather App
 
-Applicazione meteo full stack sviluppata come progetto finale del bootcamp.
+> Applicazione meteo **full-stack professionale** sviluppata da Granata Vincenzo.
+> Backend Spring Boot · Frontend React + Vite · Design glassmorphism premium
 
-## Tecnologie utilizzate
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-6DB33F?style=flat-square&logo=spring-boot)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite)
+![Java](https://img.shields.io/badge/Java-17-ED8B00?style=flat-square&logo=openjdk)
+![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
 
-**Backend**
-- Java 25
-- Apache Tomcat 11
-- Jakarta Servlet API
-- Apache Ant (build tool)
+---
 
-**Frontend**
-- React 18 (via CDN)
-- Chart.js (grafici)
-- CSS Grid (layout responsive)
+## ✨ Funzionalità
 
-**API esterne**
-- OpenWeatherMap — meteo attuale
-- Open-Meteo — previsioni 7 giorni e geocoding
-- Pexels — immagini di sfondo dinamiche
+| Funzionalità | Dettaglio |
+|---|---|
+| 🔍 **Ricerca città** | Autocomplete in tempo reale con Open-Meteo Geocoding |
+| 📍 **Geolocalizzazione** | Rilevamento automatico città all'avvio |
+| 🌡️ **Meteo attuale** | Temperatura, percepita, vento, umidità, visibilità |
+| 📅 **Previsioni 7 giorni** | Striscia drag-to-scroll con emoji meteo, max/min e probabilità pioggia |
+| 📊 **Grafico orario** | Temperatura, pioggia o vento ora per ora con tooltip personalizzati |
+| 🗺️ **Radar interattivo** | Mappa Leaflet con layer selezionabili (Pioggia / Temp / Vento / Nuvole) |
+| 🔁 **Toggle °C / °F** | Conversione al volo di tutte le temperature e velocità |
+| 🌙 **Tema chiaro/scuro** | Modalità dark (default) e light con transizioni fluide |
+| 🖼️ **Sfondo dinamico** | Immagini Pexels cambiate in base alle condizioni meteo |
+| 🕐 **Ora locale** | Ora corrente nella città cercata |
+| ☀️ **Indice UV** | Barra colorata con etichetta (Basso → Estremo) |
+| 📌 **Città recenti** | Ultime 5 città salvate nel localStorage |
+| 💀 **Skeleton loading** | Placeholder animati durante il caricamento |
 
-## Funzionalità
+---
 
-- Meteo attuale per qualsiasi città del mondo
-- Previsioni per i prossimi 7 giorni
-- Grafico temperatura ora per ora
-- Sfondo dinamico che cambia in base al meteo
-- Cronologia delle ultime 5 città cercate (salvata nel browser)
-- Layout responsive a 3 colonne (desktop) / 1 colonna (mobile)
-- Informazioni aggiuntive: alba, tramonto, pressione, UV index, ora locale
+## 🛠️ Stack Tecnologico
 
-## Struttura del progetto
+### Backend
+| Tecnologia | Versione | Utilizzo |
+|---|---|---|
+| Java | 17 | Runtime |
+| Spring Boot | 3.2.5 | Framework REST |
+| Spring Web (RestClient) | 3.2.5 | Chiamate HTTP verso API esterne |
+| Spring Cache | 3.2.5 | Cache in-memory delle risposte API |
+
+### Frontend
+| Tecnologia | Versione | Utilizzo |
+|---|---|---|
+| React | 19 | UI framework |
+| Vite | 5 | Build tool & dev server |
+| Framer Motion | 12 | Animazioni e transizioni |
+| Chart.js + react-chartjs-2 | 4 / 5 | Grafico orario |
+| React Leaflet + Leaflet | 5 / 1.9 | Mappa radar |
+| Lucide React | 1.16 | Icone UI |
+| Axios | 1.x | HTTP client |
+
+### API Esterne
+| API | Piano | Utilizzo |
+|---|---|---|
+| [OpenWeatherMap](https://openweathermap.org/api) | Gratuito | Meteo attuale, geolocalizzazione inversa, tile mappa |
+| [Open-Meteo](https://open-meteo.com) | Gratuito | Previsioni 7 giorni + dati orari + geocoding |
+| [Pexels](https://www.pexels.com/api/) | Gratuito | Immagini di sfondo dinamiche |
+
+---
+
+## 📁 Struttura del Progetto
+
+```
 weather-app/
-├── src/
-│   ├── main/java/com/weatherapp/
-│   │   ├── WeatherServlet.java      # Servlet principale (3 endpoint REST)
-│   │   ├── WeatherService.java      # Logica chiamate API esterne
-│   │   ├── WeatherException.java    # Eccezione personalizzata
-│   │   └── ApiException.java        # Eccezione per errori API
-│   └── test/java/com/weatherapp/
-│       └── WeatherServiceTest.java  # 5 test unitari JUnit 5
-├── WebContent/
-│   ├── index.html                   # Pagina principale
-│   ├── css/style.css                # Stili e layout responsive
-│   ├── js/app.js                    # Frontend React
-│   └── WEB-INF/
-│       ├── web.xml                  # Configurazione Tomcat
-│       └── config.properties        # API keys (NON su GitHub)
-├── lib/
-│   ├── junit-platform-console-standalone-1.10.2.jar
-│   └── mockito-core-5.11.0.jar
-├── build.xml                        # Script Ant
-├── build.properties                 # Percorsi Tomcat
-└── README.md                        # Questo file
+├── frontend/                          # App React (Vite)
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── WeatherCard.jsx        # Card meteo attuale + icone SVG animate
+│   │   │   ├── ForecastStrip.jsx      # Striscia previsioni 7 giorni
+│   │   │   ├── HourlyChart.jsx        # Grafico orario interattivo
+│   │   │   ├── GeoPanel.jsx           # Alba, tramonto, pressione, UV
+│   │   │   ├── LocalPanel.jsx         # Ora locale + mappa radar
+│   │   │   ├── SearchBar.jsx          # Ricerca con autocomplete
+│   │   │   ├── RecentCities.jsx       # Chip città recenti
+│   │   │   ├── WeatherIcon.jsx        # Icone SVG animate per condizione meteo
+│   │   │   └── SkeletonLoader.jsx     # Skeleton loading 3 colonne
+│   │   ├── hooks/
+│   │   │   └── useWeatherData.js      # Custom hook per fetch dati
+│   │   ├── utils/
+│   │   │   └── weatherHelpers.js      # Helper: temp, vento, UV, date
+│   │   ├── App.jsx                    # Orchestratore (stato globale)
+│   │   ├── index.css                  # Design system completo
+│   │   └── main.jsx                   # Entry point
+│   ├── vite.config.js                 # Config Vite + proxy → backend
+│   └── package.json
+│
+├── src/main/java/com/weatherapp/      # Backend Spring Boot
+│   ├── WeatherApplication.java        # Entry point Spring Boot
+│   ├── WeatherController.java         # REST endpoints (/api/*)
+│   ├── WeatherService.java            # Logica chiamate API esterne + cache
+│   ├── WeatherException.java          # Eccezione custom HTTP
+│   ├── ApiException.java              # Eccezione per errori API esterne
+│   └── GlobalExceptionHandler.java    # @ControllerAdvice per errori HTTP
+│
+├── src/main/resources/
+│   └── application.properties         # API keys e configurazione (NON in Git)
+│
+├── src/test/java/com/weatherapp/
+│   └── WeatherServiceTest.java        # Test JUnit 5
+│
+├── pom.xml                            # Maven + frontend-maven-plugin
+└── README.md
+```
 
-## Requisiti
+---
 
-- Java 17 o superiore
-- Apache Tomcat 11
-- Apache Ant 1.10+
-- Account OpenWeatherMap (API key gratuita)
-- Account Pexels (API key gratuita)
+## 🚀 Installazione e Avvio
 
-## Installazione e avvio
+### Prerequisiti
+- **Java 17+**
+- **Maven 3.8+**
+- **Node.js 20+** (solo per sviluppo frontend separato)
 
 ### 1. Clona il repository
 
 ```bash
-git clone https://github.com/Vincenzogr/weather-app.git
-cd weather-app
+git clone https://github.com/Vincenzogr/Weather-app.git
+cd Weather-app
 ```
 
-### 2. Configura le API key
+### 2. Configura le API Key
 
-Crea il file `WebContent/WEB-INF/config.properties`:
+Crea/modifica il file `src/main/resources/application.properties`:
 
 ```properties
-openweathermap.api.key=LA_TUA_API_KEY_QUI
-pexels.api.key=LA_TUA_API_KEY_QUI
+# OpenWeatherMap — https://openweathermap.org/api
+openweathermap.api.key=LA_TUA_KEY_QUI
+
+# Pexels — https://www.pexels.com/api/
+pexels.api.key=LA_TUA_KEY_QUI
 ```
 
-Ottieni le chiavi gratuitamente su:
-- OpenWeatherMap: https://openweathermap.org/api
-- Pexels: https://www.pexels.com/api/
+> ⚠️ **Non committare mai le API key.** Il file è già in `.gitignore`.
 
-### 3. Configura build.properties
-
-Apri `build.properties` e imposta il percorso di Tomcat:
-
-```properties
-tomcat.home=C:/apache-tomcat-11.0.20
-servlet.jar=${tomcat.home}/lib/servlet-api.jar
-deploy.dir=${tomcat.home}/webapps
-```
-
-### 4. Esegui i test
+### 3a. Avvio completo (Build + Backend)
 
 ```bash
-ant test
+mvn spring-boot:run
 ```
 
-Output atteso: `5 tests successful`
+Il plugin Maven scarica Node.js, esegue `npm install` e `npm run build` automaticamente,
+poi avvia il backend su `http://localhost:8080`.
 
-### 5. Build e deploy
+### 3b. Sviluppo Frontend separato
+
+In un terminale, avvia il backend:
 
 ```bash
-ant deploy
+mvn spring-boot:run -Pskip-frontend
+# oppure avvialo dall'IDE
 ```
 
-### 6. Avvia Tomcat
+In un altro terminale, avvia Vite (hot-reload):
 
 ```bash
-# Windows
-C:\apache-tomcat-11.0.20\bin\startup.bat
-
-# Linux/Mac
-./catalina.sh start
+cd frontend
+npm install
+npm run dev
+# → http://localhost:5173 (proxy → http://localhost:8080)
 ```
 
-### 7. Apri nel browser
-http://localhost:8080/weather-app/
+---
 
-## Esecuzione dei test
+## 🧪 Test
 
 ```bash
-ant test        # solo test
-ant all         # test + build + deploy
+mvn test
 ```
 
-## Sicurezza
+Output atteso: tutti i test JUnit 5 in `WeatherServiceTest.java` passano.
 
-- Le API key sono in `config.properties` che è escluso da Git tramite `.gitignore`
-- Il file `config.properties` non viene mai committato
-- La cartella `WEB-INF` è protetta da Tomcat — non accessibile dal browser
-- Tutti gli input utente sono validati lato backend prima di essere usati
+---
 
-## Licenza
+## 🔒 Sicurezza
 
-MIT License — vedi file LICENSE
+- Le API key risiedono solo in `application.properties` (escluso da `.gitignore`)
+- Backend valida tutti i parametri prima di chiamare le API esterne
+- Nessuna chiave è mai esposta al frontend direttamente
+- Spring Cache evita chiamate ridondanti alle API esterne
 
-## Uso responsabile dell'AI
+---
 
-Parti di questo progetto sono state sviluppate con il supporto di strumenti AI (Claude di Anthropic).
-Il codice generato è stato:
-- Compreso e analizzato prima di essere integrato
-- Testato manualmente e con test unitari
-- Modificato e adattato alle esigenze specifiche del progetto
-- Documentato con commenti propri
+## 🎨 Design
 
-L'AI è stata usata come strumento di supporto all'apprendimento,
-non come sostituto della comprensione del codice.
+- **Dark mode** (default) e **Light mode** con transizione fluida
+- **Glassmorphism** con `backdrop-filter` e bordi semitrasparenti
+- **Font**: Inter (UI) + Outfit (numeri/display) da Google Fonts
+- **Icone meteo SVG** animate con CSS keyframes (sole rotante, pioggia, neve, fulmine...)
+- **Skeleton loading** durante il fetch dati
+- **Responsive**: layout 3 colonne → 2 colonne → 1 colonna
 
-## Autore
+---
 
-Granata Vincenzo — Training for Software Developer - Italian - 2026
+## 🤖 Uso responsabile dell'AI
+
+Parti di questo progetto sono state sviluppate con il supporto di strumenti AI (Claude di Anthropic e Antigravity IDE).
+Il codice generato è stato compreso, testato, modificato e documentato dallo sviluppatore.
+L'AI è stata usata come strumento di supporto all'apprendimento, non come sostituto della comprensione del codice.
+
+---
+
+## 👤 Autore
+
+**Granata Vincenzo** — Training for Software Developer · Italian · 2026
+
+[![GitHub](https://img.shields.io/badge/GitHub-Vincenzogr-181717?style=flat-square&logo=github)](https://github.com/Vincenzogr)

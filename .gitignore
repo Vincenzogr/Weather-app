@@ -28,3 +28,11 @@ desktop.ini
 
 # ── LOG
 *.log
+/target/
+/frontend/node/
+
+
+# API Keys locali
+application-secret.properties
+*-secret.properties
+

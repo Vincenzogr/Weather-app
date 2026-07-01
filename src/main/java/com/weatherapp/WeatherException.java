@@ -5,7 +5,7 @@ package com.weatherapp;
  * Invece di usare RuntimeException generica, usiamo questa
  * classe per identificare meglio il tipo di errore.
  */
-public class WeatherException extends Exception {
+public class WeatherException extends RuntimeException {
 
     private final int statusCode;
 
