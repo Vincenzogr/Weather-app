@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -12,24 +12,65 @@ import {
   Filler
 } from 'chart.js';
 import { Thermometer, Droplets, Wind } from 'lucide-react';
-
 import { useTranslation } from 'react-i18next';
+import { getWeatherCodeInfo, formatTempShort } from '../utils/weatherHelpers';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const TABS = [
-  { key: 'temp',  labelKey: 'hourly_temp', icon: Thermometer, color: '#38bdf8', bg: 'rgba(56,189,248,0.15)',  unit: '°' },
-  { key: 'rain',  labelKey: 'rain',        icon: Droplets,    color: '#818cf8', bg: 'rgba(129,140,248,0.15)', unit: '%' },
-  { key: 'wind',  labelKey: 'wind',        icon: Wind,        color: '#a78bfa', bg: 'rgba(167,139,250,0.15)', unit: '' },
+  { key: 'temp',  labelKey: 'hourly_temp', icon: Thermometer, color: '#38bdf8', unit: '°' },
+  { key: 'rain',  labelKey: 'rain',        icon: Droplets,    color: '#818cf8', unit: '%' },
+  { key: 'wind',  labelKey: 'wind',        icon: Wind,        color: '#a78bfa', unit: '' },
 ];
+
+// Plugin per gradient fill
+function buildGradientDataset(ctx, color, labels, rawData, labelStr, unit) {
+  const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+  gradient.addColorStop(0,   color.replace(')', ',0.35)').replace('rgb', 'rgba'));
+  gradient.addColorStop(1,   color.replace(')', ',0.0)').replace('rgb', 'rgba'));
+  return {
+    label: labelStr,
+    data: rawData,
+    borderColor: color,
+    backgroundColor: gradient,
+    pointBackgroundColor: color,
+    pointBorderColor: 'transparent',
+    pointRadius: 3,
+    pointHoverRadius: 6,
+    fill: true,
+    tension: 0.45,
+    borderWidth: 2.5,
+  };
+}
 
 export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
   const { t } = useTranslation();
   const [chartMode, setChartMode] = useState('temp');
+  const chartRef = useRef(null);
 
+  const startIndex = selectedDay * 24;
+
+  // Dati per il carosello orario
+  const hourlySlots = useMemo(() => {
+    if (!forecast) return [];
+    return forecast.hourly.time
+      .slice(startIndex, startIndex + 24)
+      .map((timeStr, i) => {
+        const hour = timeStr.split('T')[1]?.slice(0, 5) ?? '';
+        const temp = forecast.hourly.temperature_2m?.[startIndex + i] ?? 0;
+        const code = forecast.hourly.weathercode?.[startIndex + i] ?? 0;
+        const rainP = forecast.hourly.precipitation_probability?.[startIndex + i] ?? 0;
+        const { emoji } = getWeatherCodeInfo(code);
+        const nowHour = new Date().getHours();
+        const slotHour = parseInt(hour.split(':')[0], 10);
+        const isCurrent = selectedDay === 0 && slotHour === nowHour;
+        return { hour, temp, emoji, rainP, isCurrent };
+      });
+  }, [forecast, selectedDay]);
+
+  // Dati per il grafico
   const chartData = useMemo(() => {
     if (!forecast) return null;
-    const startIndex = selectedDay * 24;
     const labels = forecast.hourly.time
       .slice(startIndex, startIndex + 24)
       .map(t => t.split('T')[1].slice(0, 5));
@@ -53,19 +94,16 @@ export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
 
   const data = {
     labels: chartData.labels,
-    datasets: [{
-      label: t(tab.labelKey),
-      data:  chartData.rawData,
-      borderColor: tab.color,
-      backgroundColor: tab.bg,
-      pointBackgroundColor: tab.color,
-      pointBorderColor: 'transparent',
-      pointRadius: 3,
-      pointHoverRadius: 6,
-      fill: true,
-      tension: 0.45,
-      borderWidth: 2.5,
-    }]
+    datasets: [
+      buildGradientDataset(
+        chartRef.current?.ctx ?? document.createElement('canvas').getContext('2d'),
+        tab.color,
+        chartData.labels,
+        chartData.rawData,
+        t(tab.labelKey),
+        tab.unit
+      )
+    ]
   };
 
   const options = {
@@ -74,12 +112,13 @@ export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: 'rgba(13, 25, 41, 0.92)',
+        backgroundColor: 'rgba(13, 25, 41, 0.95)',
         titleColor: '#94a3b8',
         bodyColor: '#f8fafc',
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'rgba(56,189,248,0.2)',
         borderWidth: 1,
         padding: 12,
+        cornerRadius: 10,
         bodyFont: { family: 'Outfit', size: 15, weight: '700' },
         titleFont: { family: 'Inter', size: 11 },
         callbacks: {
@@ -110,6 +149,25 @@ export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
 
   return (
     <div className="chart-container">
+      {/* Carosello 24h */}
+      <div className="hourly-carousel" role="list" aria-label="Previsioni orarie">
+        {hourlySlots.map((slot, i) => (
+          <div
+            key={i}
+            className={`hourly-card${slot.isCurrent ? ' current-hour' : ''}`}
+            role="listitem"
+          >
+            <span className="hourly-time">{slot.hour}</span>
+            <span className="hourly-icon">{slot.emoji}</span>
+            <span className="hourly-temp">{formatTempShort(slot.temp, unit)}</span>
+            {slot.rainP > 0 && (
+              <span className="hourly-rain">💧{slot.rainP}%</span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Header grafico */}
       <div className="chart-header">
         <span className="chart-title">{t('hourly_trend')} — {t(tab.labelKey)}</span>
         <div className="chart-tabs" role="tablist">
@@ -133,7 +191,7 @@ export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
       </div>
 
       <div className="chart-canvas-wrapper">
-        <Line data={data} options={options} />
+        <Line ref={chartRef} data={data} options={options} />
       </div>
     </div>
   );
