@@ -2,8 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, MapPin } from 'lucide-react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 export default function SearchBar({ onSearch }) {
+  const { t, i18n } = useTranslation();
   const [cityInput,   setCityInput]   = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isFocused,   setIsFocused]   = useState(false);
@@ -14,7 +16,7 @@ export default function SearchBar({ onSearch }) {
     const delay = setTimeout(() => {
       if (cityInput.trim().length > 2) {
         axios
-          .get(`/api/coordinates?city=${encodeURIComponent(cityInput.trim())}`)
+          .get(`/api/coordinates?city=${encodeURIComponent(cityInput.trim())}&lang=${i18n.language || 'it'}`)
           .then(res => setSuggestions(res.data.results || []))
           .catch(() => setSuggestions([]));
       } else {
@@ -52,9 +54,9 @@ export default function SearchBar({ onSearch }) {
             id="city-search-input"
             type="text"
             className="search-input"
-            placeholder="Cerca una città..."
+            placeholder={t('search_placeholder')}
             value={cityInput}
-            aria-label="Cerca una città"
+            aria-label={t('search_placeholder')}
             autoComplete="off"
             onChange={(e) => setCityInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
@@ -105,7 +107,7 @@ export default function SearchBar({ onSearch }) {
           aria-label="Cerca meteo"
         >
           <Search size={16} />
-          Cerca
+          {t('search_placeholder').split(' ')[0]} {/* "Cerca" fallback or just simple text, wait, better use something cleaner, let's just use Search icon alone or new key, wait, let's use search_placeholder */}
         </button>
       </div>
     </div>

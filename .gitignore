@@ -36,3 +36,7 @@ desktop.ini
 application-secret.properties
 *-secret.properties
 
+
+# Maven portatile locale
+.maven/
+

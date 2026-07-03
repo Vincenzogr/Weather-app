@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Clock, Eye, Layers } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { useEffect } from 'react';
@@ -22,25 +23,26 @@ function MapUpdater({ center }) {
 }
 
 const MAP_LAYERS = [
-  { key: 'precipitation_new', label: '🌧 Pioggia' },
-  { key: 'temp_new',          label: '🌡 Temp' },
-  { key: 'wind_new',          label: '💨 Vento' },
-  { key: 'clouds_new',        label: '☁ Nuvole' },
+  { key: 'precipitation_new', icon: '🌧', labelKey: 'rain' },
+  { key: 'temp_new',          icon: '🌡', labelKey: 'temp' },
+  { key: 'wind_new',          icon: '💨', labelKey: 'wind' },
+  { key: 'clouds_new',        icon: '☁',  labelKey: 'clouds' },
 ];
 
 export default function LocalPanel({ weather, owmKey }) {
+  const { t, i18n } = useTranslation();
   const [activeLayer, setActiveLayer] = useState('precipitation_new');
 
   if (!weather) return null;
 
-  const localTime = getCityLocalTime(weather.timezone);
+  const localTime = getCityLocalTime(weather.timezone, i18n.language);
   const center    = [weather.coord?.lat ?? 0, weather.coord?.lon ?? 0];
   const humidity  = weather.main?.humidity;
   const feelsLike = weather.main?.feels_like;
 
   return (
     <div className="glass-panel side-panel">
-      <p className="panel-title">🕐 Info Locali</p>
+      <p className="panel-title">🕐 {t('local_info')}</p>
 
       {/* Local time */}
       <div className="info-row">
@@ -48,7 +50,7 @@ export default function LocalPanel({ weather, owmKey }) {
           <Clock size={20} color="#34d399" />
         </div>
         <div className="info-content">
-          <h4>Ora locale</h4>
+          <h4>{t('local_time')}</h4>
           <p>{localTime}</p>
         </div>
       </div>
@@ -59,7 +61,7 @@ export default function LocalPanel({ weather, owmKey }) {
           <span style={{ fontSize: '1.1rem' }}>💧</span>
         </div>
         <div className="info-content">
-          <h4>Umidità relativa</h4>
+          <h4>{t('relative_humidity')}</h4>
           <p>{humidity}%</p>
         </div>
       </div>
@@ -70,16 +72,16 @@ export default function LocalPanel({ weather, owmKey }) {
           <Eye size={20} color="#818cf8" />
         </div>
         <div className="info-content">
-          <h4>Nuvolosità</h4>
+          <h4>{t('cloudiness')}</h4>
           <p>{weather.clouds?.all ?? 0}%</p>
-          <small>{weather.clouds?.all >= 75 ? 'Cielo coperto' : weather.clouds?.all >= 25 ? 'Parzialmente nuvoloso' : 'Cielo sereno'}</small>
+          <small>{weather.clouds?.all >= 75 ? t('overcast') : weather.clouds?.all >= 25 ? t('partly_cloudy') : t('clear_sky')}</small>
         </div>
       </div>
 
       {/* Map */}
       <div className="map-section-title">
         <Layers size={13} />
-        Radar Meteo
+        {t('weather_radar')}
       </div>
 
       {/* Map layer toggle buttons */}
@@ -91,7 +93,7 @@ export default function LocalPanel({ weather, owmKey }) {
             onClick={() => setActiveLayer(layer.key)}
             aria-pressed={activeLayer === layer.key}
           >
-            {layer.label}
+            {layer.icon} {t(layer.labelKey)}
           </button>
         ))}
       </div>
