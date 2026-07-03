@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon, Thermometer, AlertTriangle, Globe } from 'lucide-react';
+import { Sun, Moon, Thermometer, AlertTriangle } from 'lucide-react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
-import { useWeatherData } from './hooks/useWeatherData';
-import SearchBar       from './components/SearchBar';
-import RecentCities    from './components/RecentCities';
-import WeatherCard     from './components/WeatherCard';
-import ForecastStrip   from './components/ForecastStrip';
-import HourlyChart     from './components/HourlyChart';
-import GeoPanel        from './components/GeoPanel';
-import LocalPanel      from './components/LocalPanel';
-import LanguageSwitcher from './components/LanguageSwitcher';
-import SkeletonLoader  from './components/SkeletonLoader';
+import { useWeatherData }   from './hooks/useWeatherData';
+import SearchBar            from './components/SearchBar';
+import RecentCities         from './components/RecentCities';
+import WeatherCard          from './components/WeatherCard';
+import ForecastStrip        from './components/ForecastStrip';
+import HourlyChart          from './components/HourlyChart';
+import GeoPanel             from './components/GeoPanel';
+import LocalPanel           from './components/LocalPanel';
+import LanguageSwitcher     from './components/LanguageSwitcher';
+import SkeletonLoader       from './components/SkeletonLoader';
+import SunArcWidget         from './components/SunArcWidget';
+import MeteoGrid            from './components/MeteoGrid';
+import WeatherTips          from './components/WeatherTips';
 
 // ── Persistent recent cities ──────────────────────────────────────
 function useRecentCities() {
@@ -33,32 +36,40 @@ function useRecentCities() {
   return [recentCities, addCity];
 }
 
-// ── Dynamic background ────────────────────────────────────────────
-function useDynamicBackground(weather, isLightMode) {
-  useEffect(() => {
-    if (!weather) return;
-    const desc = (weather.weather?.[0]?.description ?? '').toLowerCase();
-    let query = 'clear sky';
-    if (desc.includes('pioggia') || desc.includes('rovesci') || desc.includes('pioviggine')) query = 'rain';
-    else if (desc.includes('neve'))                query = 'snow winter';
-    else if (desc.includes('temporale'))           query = 'thunderstorm lightning';
-    else if (desc.includes('nebbia'))              query = 'fog mist atmospheric';
-    else if (desc.includes('nuvoloso') || desc.includes('coperto')) query = 'cloudy overcast';
+// ── Favorites hook ────────────────────────────────────────────────
+function useFavorites() {
+  const [favorites, setFavorites] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('favoriteCities') ?? '[]'); }
+    catch { return []; }
+  });
 
-    query += isLightMode ? ' day nature' : ' night city lights';
+  const toggleFavorite = useCallback((city) => {
+    setFavorites(prev => {
+      const exists = prev.includes(city);
+      const updated = exists ? prev.filter(c => c !== city) : [city, ...prev].slice(0, 10);
+      localStorage.setItem('favoriteCities', JSON.stringify(updated));
+      return updated;
+    });
+  }, []);
 
-    axios.get(`/api/background?query=${encodeURIComponent(query)}`)
-      .then(res => {
-        const photos = res.data?.photos;
-        if (photos && photos.length > 0) {
-          const idx = Math.floor(Math.random() * Math.min(3, photos.length));
-          document.body.style.backgroundImage = `url('${photos[idx].src.landscape}')`;
-        }
-      })
-      .catch(() => {
-        document.body.style.backgroundImage = '';
-      });
-  }, [weather, isLightMode]);
+  return [favorites, toggleFavorite];
+}
+
+// ── Dynamic background class based on weather ─────────────────────
+function getWeatherBgClass(weather, isLightMode) {
+  if (isLightMode || !weather) return '';
+  const id   = weather.weather?.[0]?.id;
+  const icon = weather.weather?.[0]?.icon ?? '';
+  const isNight = icon.endsWith('n');
+
+  if (!id) return '';
+  if (id >= 200 && id < 300) return 'bg-storm';
+  if (id >= 300 && id < 600) return 'bg-rain';
+  if (id >= 600 && id < 700) return 'bg-snow';
+  if (id >= 700 && id < 800) return 'bg-fog';
+  if (id === 800) return isNight ? 'bg-clear-night' : 'bg-clear-day';
+  if (id >= 801 && id <= 804) return isNight ? 'bg-clear-night' : 'bg-cloudy';
+  return '';
 }
 
 // ── Main App ──────────────────────────────────────────────────────
@@ -66,11 +77,12 @@ export default function App() {
   const { t, i18n } = useTranslation();
   const { weather, forecast, airQuality, loading, error, handleSearch } = useWeatherData();
   const [recentCities, addCity] = useRecentCities();
+  const [favorites, toggleFavorite] = useFavorites();
 
-  const [selectedDay,  setSelectedDay]  = useState(0);
-  const [isLightMode,  setIsLightMode]  = useState(false);
-  const [unit,         setUnit]         = useState('C'); // 'C' | 'F'
-  const [owmKey,       setOwmKey]       = useState('');
+  const [selectedDay, setSelectedDay] = useState(0);
+  const [isLightMode, setIsLightMode] = useState(false);
+  const [unit,        setUnit]        = useState('C');
+  const [owmKey,      setOwmKey]      = useState('');
 
   // Fetch OWM key for map tiles
   useEffect(() => {
@@ -84,10 +96,15 @@ export default function App() {
     document.body.classList.toggle('light-mode', isLightMode);
   }, [isLightMode]);
 
-  // Dynamic background
-  useDynamicBackground(weather, isLightMode);
+  // Dynamic weather background class
+  useEffect(() => {
+    const bgClasses = ['bg-clear-day','bg-clear-night','bg-rain','bg-storm','bg-snow','bg-fog','bg-cloudy'];
+    bgClasses.forEach(c => document.body.classList.remove(c));
+    const cls = getWeatherBgClass(weather, isLightMode);
+    if (cls) document.body.classList.add(cls);
+  }, [weather, isLightMode]);
 
-  // Update document title dynamically
+  // Update document title
   useEffect(() => {
     if (weather) {
       document.title = `${Math.round(weather.main?.temp)}° ${weather.name} — Meteo App`;
@@ -96,33 +113,15 @@ export default function App() {
     }
   }, [weather]);
 
-  // Reset selected day when new city loads
-  useEffect(() => {
-    setSelectedDay(0);
-  }, [weather]);
+  // Reset selected day on new city
+  useEffect(() => { setSelectedDay(0); }, [weather]);
 
   const onSearch = useCallback(async (city) => {
     const canonical = await handleSearch(city);
     if (canonical) addCity(canonical);
   }, [handleSearch, addCity]);
 
-  // Geolocation on mount
-  useEffect(() => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const res = await axios.get(
-          `/api/reverse-geocode?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
-        );
-        if (res.data && res.data.length > 0) {
-          onSearch(res.data[0].name);
-        }
-      } catch {
-        // silently ignore
-      }
-    }, () => {/* user denied or unavailable */});
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const isFavorite = weather ? favorites.includes(weather.name) : false;
 
   const showResults = weather && forecast && !loading;
 
@@ -131,9 +130,7 @@ export default function App() {
 
       {/* ── Top bar ──────────────────────────────────────────────── */}
       <div className="top-bar">
-        {/* Controls left */}
         <div className="top-bar-controls" style={{ display: 'flex', gap: '8px' }}>
-          
           <LanguageSwitcher />
 
           <button
@@ -157,18 +154,28 @@ export default function App() {
           </button>
         </div>
 
-        {/* Header center */}
         <header className="app-header">
           <h1 className="app-title">🌦 {t('app_title')}</h1>
           <p className="app-subtitle">{t('app_subtitle')}</p>
         </header>
 
-        {/* Spacer right */}
         <div style={{ width: 140 }} />
       </div>
 
-      {/* ── Search ───────────────────────────────────────────────── */}
+      {/* ── Search (with GPS integrated) ─────────────────────────── */}
       <SearchBar onSearch={onSearch} />
+
+      {/* ── Favorites bar ────────────────────────────────────────── */}
+      {favorites.length > 0 && (
+        <div className="favorites-bar">
+          <span className="favorites-label">⭐ {t('favorites', 'Preferiti')}</span>
+          {favorites.map(city => (
+            <button key={city} className="favorite-chip" onClick={() => onSearch(city)}>
+              ⭐ {city}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── Recent cities ────────────────────────────────────────── */}
       <RecentCities cities={recentCities} onSelect={onSearch} />
@@ -215,14 +222,23 @@ export default function App() {
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            {/* Left — Geographic info & Air Quality */}
+            {/* Left — Geographic info & Sun Arc */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <GeoPanel weather={weather} forecast={forecast} airQuality={airQuality} />
+              <SunArcWidget weather={weather} />
             </div>
 
             {/* Center — Main data */}
             <div className="center-panel">
-              <WeatherCard  weather={weather} unit={unit} />
+              <WeatherCard
+                weather={weather}
+                forecast={forecast}
+                unit={unit}
+                isFavorite={isFavorite}
+                onToggleFavorite={() => toggleFavorite(weather.name)}
+              />
+              <WeatherTips weather={weather} forecast={forecast} airQuality={airQuality} />
+              <MeteoGrid weather={weather} forecast={forecast} airQuality={airQuality} unit={unit} />
               <ForecastStrip
                 forecast={forecast}
                 selectedDay={selectedDay}

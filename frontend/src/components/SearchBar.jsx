@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin } from 'lucide-react';
+import { Search, MapPin, LocateFixed } from 'lucide-react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 
-export default function SearchBar({ onSearch }) {
+export default function SearchBar({ onSearch, onGeolocate }) {
   const { t, i18n } = useTranslation();
   const [cityInput,   setCityInput]   = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [isFocused,   setIsFocused]   = useState(false);
+  const [isLocating,  setIsLocating]  = useState(false);
   const inputRef = useRef(null);
 
   // Debounced autocomplete
@@ -24,12 +25,11 @@ export default function SearchBar({ onSearch }) {
       }
     }, 450);
     return () => clearTimeout(delay);
-  }, [cityInput]);
+  }, [cityInput, i18n.language]);
 
   const handleSubmit = (cityQuery, displayName) => {
     const city = (cityQuery || cityInput).trim();
     if (!city) return;
-    // Show just the city name in the input (without country code)
     setCityInput(displayName || city.split(',')[0].trim());
     setSuggestions([]);
     onSearch(city);
@@ -42,11 +42,36 @@ export default function SearchBar({ onSearch }) {
     }, 200);
   };
 
+  const handleGPS = () => {
+    if (!navigator.geolocation || isLocating) return;
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const res = await axios.get(
+            `/api/reverse-geocode?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`
+          );
+          if (res.data && res.data.length > 0) {
+            const city = res.data[0].name;
+            setCityInput(city);
+            onSearch(city);
+          }
+        } catch {
+          // silently ignore
+        } finally {
+          setIsLocating(false);
+        }
+      },
+      () => setIsLocating(false),
+      { timeout: 10000 }
+    );
+  };
+
   return (
     <div className="search-section">
       <div className="search-container">
         <div className="search-wrapper">
-          {/* Left icon */}
+          {/* Left search icon */}
           <Search size={18} className="search-icon-left" />
 
           <input
@@ -64,6 +89,17 @@ export default function SearchBar({ onSearch }) {
             onBlur={handleBlur}
           />
 
+          {/* GPS button */}
+          <button
+            className={`gps-btn${isLocating ? ' locating' : ''}`}
+            onClick={handleGPS}
+            aria-label={t('geolocate', 'Usa posizione GPS')}
+            title={t('geolocate', 'Usa posizione GPS')}
+            type="button"
+          >
+            <LocateFixed size={16} />
+          </button>
+
           {/* Autocomplete dropdown */}
           <AnimatePresence>
             {suggestions.length > 0 && isFocused && (
@@ -73,6 +109,7 @@ export default function SearchBar({ onSearch }) {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -6, scale: 0.98 }}
                 transition={{ duration: 0.15 }}
+                role="listbox"
               >
                 {suggestions.slice(0, 6).map((s) => (
                   <div
@@ -80,7 +117,6 @@ export default function SearchBar({ onSearch }) {
                     className="suggestion-item"
                     role="option"
                     onMouseDown={() => {
-                      // Pass "Roma,IT" to OWM for disambiguation (use country_code, not country)
                       const code = s.country_code ?? s.countryCode ?? '';
                       const query = code ? `${s.name},${code}` : s.name;
                       handleSubmit(query, s.name);
@@ -104,10 +140,9 @@ export default function SearchBar({ onSearch }) {
           id="city-search-button"
           className="search-button"
           onClick={() => handleSubmit()}
-          aria-label="Cerca meteo"
+          aria-label={t('search_placeholder')}
         >
           <Search size={16} />
-          {t('search_placeholder').split(' ')[0]} {/* "Cerca" fallback or just simple text, wait, better use something cleaner, let's just use Search icon alone or new key, wait, let's use search_placeholder */}
         </button>
       </div>
     </div>
