@@ -4,6 +4,12 @@ import { Sunrise, Sunset, Activity, Wind, TrendingUp, TrendingDown } from 'lucid
 import { useTranslation } from 'react-i18next';
 import { unixToTime, getUVLabel, getUVColor } from '../utils/weatherHelpers';
 
+function calcDewPoint(tempC, humidity) {
+  const a = 17.27, b = 237.7;
+  const alpha = (a * tempC) / (b + tempC) + Math.log(humidity / 100);
+  return (b * alpha) / (a - alpha);
+}
+
 function UVTip({ uv, t }) {
   if (uv == null) return null;
   let tip = '', tipColor = '';
@@ -163,6 +169,18 @@ export default function GeoPanel({ weather, forecast, airQuality }) {
               )}
             </div>
           )}
+          
+          {/* Punto di rugiada aggiunto sotto AQI */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 12, width: '100%', paddingTop: 12, borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="info-icon-wrapper" style={{ background: 'rgba(52,211,153,0.12)' }}>
+              <span style={{ fontSize: '1.1rem' }}>🌡</span>
+            </div>
+            <div className="info-content">
+              <h4>{t('dew_point', 'Punto Rugiada')}</h4>
+              <p>{calcDewPoint(weather.main?.temp ?? 0, weather.main?.humidity ?? 0).toFixed(1)}°</p>
+              <small>condensazione</small>
+            </div>
+          </div>
         </div>
       )}
     </motion.div>

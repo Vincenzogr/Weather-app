@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { unixToTime } from '../utils/weatherHelpers';
@@ -74,9 +74,8 @@ export default function SunArcWidget({ weather }) {
 
   // Active arc (solo la porzione percorsa)
   const activePt = arcPoint(Math.min(sunPos, 1), cx, cy, rx, ry);
-  const largeArc = sunPos > 0.5 ? 1 : 0;
   const activeArcPath = sunPos > 0
-    ? `M ${cx - rx} ${cy} A ${rx} ${ry} 0 ${largeArc} 1 ${activePt.x} ${activePt.y}`
+    ? `M ${cx - rx} ${cy} A ${rx} ${ry} 0 0 1 ${activePt.x} ${activePt.y}`
     : '';
 
   const isDaytime = sunPos > 0 && sunPos < 1;

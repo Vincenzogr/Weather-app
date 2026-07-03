@@ -7,7 +7,26 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
-import { getCityLocalTime } from '../utils/weatherHelpers';
+import { getCityLocalTime, getWindDirection, formatSpeed } from '../utils/weatherHelpers';
+
+function CompassRose({ deg }) {
+  return (
+    <div className="compass-wrapper" style={{ width: 44, height: 44, margin: '0' }}>
+      <svg className="compass-svg" viewBox="0 0 52 52" style={{ width: 44, height: 44 }}>
+        <circle cx="26" cy="26" r="24" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5" />
+        {[['N',26,6],['S',26,46],['E',46,28],['O',6,28]].map(([l,x,y]) => (
+          <text key={l} x={x} y={y} textAnchor="middle" dominantBaseline="middle"
+            fill="rgba(255,255,255,0.35)" fontSize="7" fontWeight="700" fontFamily="Inter,sans-serif">{l}</text>
+        ))}
+        <g style={{ transformOrigin: '26px 26px', transform: `rotate(${deg}deg)`, transition: 'transform 1s cubic-bezier(0.25,0.46,0.45,0.94)' }}>
+          <polygon points="26,8 22,26 26,23 30,26" fill="#38bdf8" />
+          <polygon points="26,44 22,26 26,29 30,26" fill="rgba(255,255,255,0.25)" />
+        </g>
+        <circle cx="26" cy="26" r="3" fill="#38bdf8" />
+      </svg>
+    </div>
+  );
+}
 
 // Fix leaflet default icon
 const DefaultIcon = L.icon({ iconUrl: icon, shadowUrl: iconShadow, iconAnchor: [12, 41] });
@@ -39,7 +58,13 @@ export default function LocalPanel({ weather, owmKey }) {
   const center    = [weather.coord?.lat ?? 0, weather.coord?.lon ?? 0];
   const humidity  = weather.main?.humidity;
   const feelsLike = weather.main?.feels_like;
-
+  const windDeg   = weather.wind?.deg ?? 0;
+  const windDir   = getWindDirection(windDeg);
+  const windSpeed = weather.wind?.speed ?? 0;
+  // unit from context or just default to km/h or m/s? 
+  // WeatherHelpers formatSpeed uses unit. Let's pass 'C' (metric) or accept it as prop.
+  // We'll just show default metric speed.
+  
   return (
     <div className="glass-panel side-panel">
       <p className="panel-title">🕐 {t('local_info')}</p>
@@ -131,6 +156,20 @@ export default function LocalPanel({ weather, owmKey }) {
             </Popup>
           </Marker>
         </MapContainer>
+      </div>
+
+      {/* Wind with compass added below map */}
+      <div className="info-row" style={{ marginTop: 24, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%' }}>
+          <CompassRose deg={windDeg} />
+          <div className="info-content">
+            <h4>{t('wind', 'Vento')}</h4>
+            <p style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+              {formatSpeed(windSpeed, 'C')}
+              <span style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>{windDir}</span>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
