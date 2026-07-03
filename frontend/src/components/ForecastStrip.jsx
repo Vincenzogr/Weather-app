@@ -1,9 +1,11 @@
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Droplets } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { getDayName, formatTempShort, getWeatherCodeInfo } from '../utils/weatherHelpers';
 
 export default function ForecastStrip({ forecast, selectedDay, onSelectDay, unit = 'C' }) {
+  const { t, i18n } = useTranslation();
   if (!forecast) return null;
 
   const stripRef    = useRef(null);
@@ -61,7 +63,7 @@ export default function ForecastStrip({ forecast, selectedDay, onSelectDay, unit
               transition={{ delay: i * 0.05, duration: 0.25 }}
             >
               <span className="forecast-day-name">
-                {isToday ? 'Oggi' : getDayName(date)}
+                {isToday ? t('today') : getDayName(date, i18n.language)}
               </span>
               <span className="forecast-day-icon" aria-label={emoji}>{emoji}</span>
               <span className="forecast-temp-max">

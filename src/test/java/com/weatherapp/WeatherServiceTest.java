@@ -33,7 +33,7 @@ class WeatherServiceTest {
     @DisplayName("getWeather con città vuota deve lanciare WeatherException con status 400")
     void testGetWeatherCittaVuota() {
         WeatherException ex = assertThrows(WeatherException.class, () -> {
-            weatherService.getWeather("");
+            weatherService.getWeather("", "it");
         });
         assertEquals("Nome città non può essere vuoto", ex.getMessage());
         assertEquals(400, ex.getStatusCode());
@@ -45,7 +45,7 @@ class WeatherServiceTest {
         mockServer.expect(MockRestRequestMatchers.requestTo(org.hamcrest.Matchers.startsWith("https://api.openweathermap.org/data/2.5/weather")))
             .andRespond(MockRestResponseCreators.withSuccess("{\"name\":\"Roma\"}", MediaType.APPLICATION_JSON));
             
-        String response = weatherService.getWeather("Roma");
+        String response = weatherService.getWeather("Roma", "it");
         assertEquals("{\"name\":\"Roma\"}", response);
         mockServer.verify();
     }
@@ -57,10 +57,10 @@ class WeatherServiceTest {
             .andRespond(MockRestResponseCreators.withStatus(HttpStatus.NOT_FOUND));
             
         ApiException ex = assertThrows(ApiException.class, () -> {
-            weatherService.getWeather("CittaInesistente");
+            weatherService.getWeather("CittaInesistente", "it");
         });
         assertEquals(404, ex.getStatusCode());
-        assertEquals("OpenWeatherMap", ex.getApiName());
+        assertEquals("Meteo", ex.getApiName());
         mockServer.verify();
     }
 

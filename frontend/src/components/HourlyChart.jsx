@@ -13,15 +13,18 @@ import {
 } from 'chart.js';
 import { Thermometer, Droplets, Wind } from 'lucide-react';
 
+import { useTranslation } from 'react-i18next';
+
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 const TABS = [
-  { key: 'temp',  label: 'Temperatura', icon: Thermometer, color: '#38bdf8', bg: 'rgba(56,189,248,0.15)',  unit: '°' },
-  { key: 'rain',  label: 'Pioggia',     icon: Droplets,    color: '#818cf8', bg: 'rgba(129,140,248,0.15)', unit: '%' },
-  { key: 'wind',  label: 'Vento',       icon: Wind,        color: '#a78bfa', bg: 'rgba(167,139,250,0.15)', unit: '' },
+  { key: 'temp',  labelKey: 'hourly_temp', icon: Thermometer, color: '#38bdf8', bg: 'rgba(56,189,248,0.15)',  unit: '°' },
+  { key: 'rain',  labelKey: 'rain',        icon: Droplets,    color: '#818cf8', bg: 'rgba(129,140,248,0.15)', unit: '%' },
+  { key: 'wind',  labelKey: 'wind',        icon: Wind,        color: '#a78bfa', bg: 'rgba(167,139,250,0.15)', unit: '' },
 ];
 
 export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
+  const { t } = useTranslation();
   const [chartMode, setChartMode] = useState('temp');
 
   const chartData = useMemo(() => {
@@ -51,7 +54,7 @@ export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
   const data = {
     labels: chartData.labels,
     datasets: [{
-      label: tab.label,
+      label: t(tab.labelKey),
       data:  chartData.rawData,
       borderColor: tab.color,
       backgroundColor: tab.bg,
@@ -80,7 +83,7 @@ export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
         bodyFont: { family: 'Outfit', size: 15, weight: '700' },
         titleFont: { family: 'Inter', size: 11 },
         callbacks: {
-          label: (ctx) => ` ${ctx.parsed.y}${tab.unit} ${tab.label}`,
+          label: (ctx) => ` ${ctx.parsed.y}${tab.unit} ${t(tab.labelKey)}`,
         }
       }
     },
@@ -108,21 +111,21 @@ export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
   return (
     <div className="chart-container">
       <div className="chart-header">
-        <span className="chart-title">Andamento orario — {tab.label}</span>
+        <span className="chart-title">{t('hourly_trend')} — {t(tab.labelKey)}</span>
         <div className="chart-tabs" role="tablist">
-          {TABS.map(t => {
-            const Icon = t.icon;
+          {TABS.map(tItem => {
+            const Icon = tItem.icon;
             return (
               <button
-                key={t.key}
-                id={`chart-tab-${t.key}`}
-                className={`chart-tab ${chartMode === t.key ? 'active' : ''}`}
-                onClick={() => setChartMode(t.key)}
+                key={tItem.key}
+                id={`chart-tab-${tItem.key}`}
+                className={`chart-tab ${chartMode === tItem.key ? 'active' : ''}`}
+                onClick={() => setChartMode(tItem.key)}
                 role="tab"
-                aria-selected={chartMode === t.key}
+                aria-selected={chartMode === tItem.key}
               >
                 <Icon size={12} style={{ display: 'inline', marginRight: 4 }} />
-                {t.label}
+                {t(tItem.labelKey)}
               </button>
             );
           })}

@@ -1,10 +1,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Droplets, Wind, Eye } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import WeatherIcon from './WeatherIcon';
 import { owmToCategory, formatTemp, formatTempShort, formatSpeed, getWindDirection, getFormattedDate } from '../utils/weatherHelpers';
 
 export default function WeatherCard({ weather, unit = 'C' }) {
+  const { t, i18n } = useTranslation();
   if (!weather) return null;
 
   const category = owmToCategory(weather);
@@ -25,7 +27,7 @@ export default function WeatherCard({ weather, unit = 'C' }) {
       </div>
 
       {/* Date */}
-      <p className="current-date">{getFormattedDate()}</p>
+      <p className="current-date">{getFormattedDate(i18n.language)}</p>
 
       {/* Animated weather icon */}
       <div className="weather-icon-container">
@@ -39,7 +41,7 @@ export default function WeatherCard({ weather, unit = 'C' }) {
 
       {/* Feels like */}
       <p className="feels-like">
-        Percepita {formatTempShort(weather.main.feels_like, unit)}
+        {t('feels_like')} {formatTempShort(weather.main.feels_like, unit)}
       </p>
 
       {/* Description */}
@@ -54,7 +56,7 @@ export default function WeatherCard({ weather, unit = 'C' }) {
           <div className="quick-stat-icon">
             <Droplets size={22} color="#38bdf8" />
           </div>
-          <p className="quick-stat-label">Umidità</p>
+          <p className="quick-stat-label">{t('humidity')}</p>
           <p className="quick-stat-value">{weather.main.humidity}%</p>
         </div>
 
@@ -63,7 +65,7 @@ export default function WeatherCard({ weather, unit = 'C' }) {
           <div className="quick-stat-icon">
             <Wind size={22} color="#a78bfa" />
           </div>
-          <p className="quick-stat-label">Vento</p>
+          <p className="quick-stat-label">{t('wind')}</p>
           <p className="quick-stat-value">
             {formatSpeed(weather.wind?.speed ?? 0, unit)}
             <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: 4 }}>
@@ -77,7 +79,7 @@ export default function WeatherCard({ weather, unit = 'C' }) {
           <div className="quick-stat-icon">
             <Eye size={22} color="#34d399" />
           </div>
-          <p className="quick-stat-label">Visibilità</p>
+          <p className="quick-stat-label">{t('visibility')}</p>
           <p className="quick-stat-value">
             {((weather.visibility ?? 0) / 1000).toFixed(1)} km
           </p>

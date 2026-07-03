@@ -21,6 +21,7 @@ public class WeatherService {
     private static final String OWM_BASE_URL = "https://api.openweathermap.org/data/2.5/weather";
     private static final String GEO_URL = "https://geocoding-api.open-meteo.com/v1/search";
     private static final String FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
+    private static final String AIR_QUALITY_URL = "https://air-quality-api.open-meteo.com/v1/air-quality";
 
     private final RestClient restClient;
     private final String owmApiKey;
@@ -74,15 +75,16 @@ public class WeatherService {
     }
 
     @Cacheable("reverse-geocode")
-    public String getReverseGeocode(String lat, String lon) throws WeatherException {
+    public String getReverseGeocode(String lat, String lon, String lang) throws WeatherException {
         if (lat == null || lon == null) {
             throw new WeatherException("Latitudine e longitudine obbligatorie", 400);
         }
 
-        String url = String.format("https://api.openweathermap.org/geo/1.0/reverse?lat=%s&lon=%s&limit=1&appid=%s",
+        String url = String.format("https://api.openweathermap.org/geo/1.0/reverse?lat=%s&lon=%s&limit=1&appid=%s&lang=%s",
                 lat.trim(),
                 lon.trim(),
-                owmApiKey
+                owmApiKey,
+                lang
         );
 
         return restClient.get()
@@ -96,7 +98,7 @@ public class WeatherService {
     }
 
     @Cacheable("weather_v2")
-    public String getWeather(String city) throws WeatherException {
+    public String getWeather(String city, String lang) throws WeatherException {
         if (city == null || city.trim().isEmpty()) {
             throw new WeatherException("Nome città non può essere vuoto", 400);
         }
@@ -105,10 +107,11 @@ public class WeatherService {
         String encodedCity = URLEncoder.encode(city.trim(), StandardCharsets.UTF_8)
                 .replace("%2C", ",");   // restore comma for country-code format
 
-        String url = String.format("%s?q=%s&appid=%s&units=metric&lang=it",
+        String url = String.format("%s?q=%s&appid=%s&units=metric&lang=%s",
                 OWM_BASE_URL,
                 encodedCity,
-                owmApiKey
+                owmApiKey,
+                lang
         );
 
         return restClient.get()
@@ -124,14 +127,15 @@ public class WeatherService {
     }
 
     @Cacheable("coordinates")
-    public String getCoordinates(String city) throws WeatherException {
+    public String getCoordinates(String city, String lang) throws WeatherException {
         if (city == null || city.trim().isEmpty()) {
             throw new WeatherException("Nome città non può essere vuoto", 400);
         }
 
-        String url = String.format("%s?name=%s&count=6&language=it&format=json",
+        String url = String.format("%s?name=%s&count=6&language=%s&format=json",
                 GEO_URL,
-                URLEncoder.encode(city.trim(), StandardCharsets.UTF_8)
+                URLEncoder.encode(city.trim(), StandardCharsets.UTF_8),
+                lang
         );
 
         return restClient.get()
@@ -165,6 +169,28 @@ public class WeatherService {
                 .onStatus(HttpStatusCode::isError, (request, response) -> {
                     int status = response.getStatusCode().value();
                     throw new ApiException("Previsioni", "Impossibile scaricare le previsioni (" + status + ")", status);
+                })
+                .body(String.class);
+    }
+
+    @Cacheable("air_quality")
+    public String getAirQuality(String latitude, String longitude) throws WeatherException {
+        if (latitude == null || longitude == null) {
+            throw new WeatherException("Latitudine e longitudine obbligatorie", 400);
+        }
+
+        String url = String.format("%s?latitude=%s&longitude=%s&current=european_aqi,uv_index",
+                AIR_QUALITY_URL,
+                latitude.trim(),
+                longitude.trim()
+        );
+
+        return restClient.get()
+                .uri(url)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (request, response) -> {
+                    int status = response.getStatusCode().value();
+                    throw new ApiException("Qualità Aria", "Impossibile scaricare i dati della qualità dell'aria (" + status + ")", status);
                 })
                 .body(String.class);
     }

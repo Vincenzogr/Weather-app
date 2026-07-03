@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon, Thermometer, AlertTriangle } from 'lucide-react';
+import { Sun, Moon, Thermometer, AlertTriangle, Globe } from 'lucide-react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 import { useWeatherData } from './hooks/useWeatherData';
 import SearchBar       from './components/SearchBar';
@@ -11,6 +12,7 @@ import ForecastStrip   from './components/ForecastStrip';
 import HourlyChart     from './components/HourlyChart';
 import GeoPanel        from './components/GeoPanel';
 import LocalPanel      from './components/LocalPanel';
+import LanguageSwitcher from './components/LanguageSwitcher';
 import SkeletonLoader  from './components/SkeletonLoader';
 
 // ── Persistent recent cities ──────────────────────────────────────
@@ -61,7 +63,8 @@ function useDynamicBackground(weather, isLightMode) {
 
 // ── Main App ──────────────────────────────────────────────────────
 export default function App() {
-  const { weather, forecast, loading, error, handleSearch } = useWeatherData();
+  const { t, i18n } = useTranslation();
+  const { weather, forecast, airQuality, loading, error, handleSearch } = useWeatherData();
   const [recentCities, addCity] = useRecentCities();
 
   const [selectedDay,  setSelectedDay]  = useState(0);
@@ -129,15 +132,18 @@ export default function App() {
       {/* ── Top bar ──────────────────────────────────────────────── */}
       <div className="top-bar">
         {/* Controls left */}
-        <div className="top-bar-controls">
+        <div className="top-bar-controls" style={{ display: 'flex', gap: '8px' }}>
+          
+          <LanguageSwitcher />
+
           <button
             id="theme-toggle"
             className="control-btn"
             onClick={() => setIsLightMode(v => !v)}
-            aria-label={isLightMode ? 'Passa al tema scuro' : 'Passa al tema chiaro'}
+            aria-label={isLightMode ? t('theme_switch_dark') : t('theme_switch_light')}
           >
             {isLightMode ? <Moon size={16} /> : <Sun size={16} />}
-            {isLightMode ? 'Scuro' : 'Chiaro'}
+            {isLightMode ? t('theme_dark') : t('theme_light')}
           </button>
 
           <button
@@ -153,8 +159,8 @@ export default function App() {
 
         {/* Header center */}
         <header className="app-header">
-          <h1 className="app-title">🌦 Meteo App</h1>
-          <p className="app-subtitle">Previsioni in tempo reale per tutto il mondo</p>
+          <h1 className="app-title">🌦 {t('app_title')}</h1>
+          <p className="app-subtitle">{t('app_subtitle')}</p>
         </header>
 
         {/* Spacer right */}
@@ -209,8 +215,10 @@ export default function App() {
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
           >
-            {/* Left — Geographic info */}
-            <GeoPanel weather={weather} forecast={forecast} />
+            {/* Left — Geographic info & Air Quality */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <GeoPanel weather={weather} forecast={forecast} airQuality={airQuality} />
+            </div>
 
             {/* Center — Main data */}
             <div className="center-panel">
@@ -229,7 +237,9 @@ export default function App() {
             </div>
 
             {/* Right — Local info + radar */}
-            <LocalPanel weather={weather} owmKey={owmKey} />
+            <div>
+              <LocalPanel weather={weather} owmKey={owmKey} />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

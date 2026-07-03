@@ -21,21 +21,23 @@ public class WeatherController {
     }
 
     @GetMapping(value = "/weather", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<String> getWeather(@RequestParam(required = false) String city) throws WeatherException {
+    public ResponseEntity<String> getWeather(@RequestParam(required = false) String city,
+                                             @RequestParam(required = false, defaultValue = "it") String lang) throws WeatherException {
         if (city == null || city.trim().isEmpty()) {
             throw new WeatherException("Parametro 'city' obbligatorio", 400);
         }
-        return ResponseEntity.ok(weatherService.getWeather(city));
+        return ResponseEntity.ok(weatherService.getWeather(city, lang));
     }
 
     @GetMapping(value = "/coordinates", produces = "application/json;charset=UTF-8")
-    public ResponseEntity<String> getCoordinates(@RequestParam(required = false) String city) throws WeatherException {
+    public ResponseEntity<String> getCoordinates(@RequestParam(required = false) String city,
+                                                 @RequestParam(required = false, defaultValue = "it") String lang) throws WeatherException {
         if (city == null || city.trim().isEmpty()) {
             throw new WeatherException("Parametro 'city' obbligatorio", 400);
         }
         // Rimuove il codice paese se presente (es. "Rome, IT" → "Rome")
         String cityOnly = city.split(",")[0].trim();
-        return ResponseEntity.ok(weatherService.getCoordinates(cityOnly));
+        return ResponseEntity.ok(weatherService.getCoordinates(cityOnly, lang));
     }
 
     @GetMapping(value = "/forecast", produces = "application/json;charset=UTF-8")
@@ -62,10 +64,20 @@ public class WeatherController {
 
     @GetMapping(value = "/reverse-geocode", produces = "application/json;charset=UTF-8")
     public ResponseEntity<String> getReverseGeocode(@RequestParam(required = false) String lat,
-                                                    @RequestParam(required = false) String lon) throws WeatherException {
+                                                    @RequestParam(required = false) String lon,
+                                                    @RequestParam(required = false, defaultValue = "it") String lang) throws WeatherException {
         if (lat == null || lon == null) {
             throw new WeatherException("Parametri 'lat' e 'lon' obbligatori", 400);
         }
-        return ResponseEntity.ok(weatherService.getReverseGeocode(lat, lon));
+        return ResponseEntity.ok(weatherService.getReverseGeocode(lat, lon, lang));
+    }
+
+    @GetMapping(value = "/air-quality", produces = "application/json;charset=UTF-8")
+    public ResponseEntity<String> getAirQuality(@RequestParam(required = false) String lat,
+                                                @RequestParam(required = false) String lon) throws WeatherException {
+        if (lat == null || lon == null) {
+            throw new WeatherException("Parametri 'lat' e 'lon' obbligatori", 400);
+        }
+        return ResponseEntity.ok(weatherService.getAirQuality(lat, lon));
     }
 }

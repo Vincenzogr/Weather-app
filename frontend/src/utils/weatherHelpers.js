@@ -22,32 +22,29 @@ export function getUVColor(uv) {
   return '#a855f7';
 }
 
-// Short Italian day name
-export function getDayName(dateStr, short = true) {
-  const days = short
-    ? ['Dom', 'Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab']
-    : ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+// Short localized day name
+export function getDayName(dateStr, lang = 'it', short = true) {
   const d = new Date(dateStr + 'T12:00:00');
-  return days[d.getDay()];
+  return new Intl.DateTimeFormat(lang, { weekday: short ? 'short' : 'long' }).format(d);
 }
 
 // City local time from OWM timezone offset (seconds)
-export function getCityLocalTime(timezoneOffset) {
+export function getCityLocalTime(timezoneOffset, lang = 'it') {
   const utcMs   = Date.now() + new Date().getTimezoneOffset() * 60000;
   const cityMs  = utcMs + timezoneOffset * 1000;
-  return new Date(cityMs).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  return new Date(cityMs).toLocaleTimeString(lang, { hour: '2-digit', minute: '2-digit' });
 }
 
 // Unix timestamp → HH:MM (UTC)
-export function unixToTime(unix) {
-  return new Date(unix * 1000).toLocaleTimeString('it-IT', {
+export function unixToTime(unix, lang = 'it') {
+  return new Date(unix * 1000).toLocaleTimeString(lang, {
     hour: '2-digit', minute: '2-digit', timeZone: 'UTC'
   });
 }
 
-// Today's date in Italian
-export function getFormattedDate() {
-  return new Date().toLocaleDateString('it-IT', {
+// Today's date in current language
+export function getFormattedDate(lang = 'it') {
+  return new Date().toLocaleDateString(lang, {
     weekday: 'long', day: 'numeric', month: 'long'
   });
 }
