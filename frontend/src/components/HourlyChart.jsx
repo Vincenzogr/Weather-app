@@ -47,6 +47,32 @@ export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
   const { t } = useTranslation();
   const [chartMode, setChartMode] = useState('temp');
   const chartRef = useRef(null);
+  const carouselRef = useRef(null);
+  const isDragging = useRef(false);
+  const startX = useRef(0);
+  const scrollLeft = useRef(0);
+
+  const handleMouseDown = (e) => {
+    isDragging.current = true;
+    startX.current = e.pageX - carouselRef.current.offsetLeft;
+    scrollLeft.current = carouselRef.current.scrollLeft;
+  };
+
+  const handleMouseLeave = () => {
+    isDragging.current = false;
+  };
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging.current) return;
+    e.preventDefault();
+    const x = e.pageX - carouselRef.current.offsetLeft;
+    const walk = (x - startX.current) * 2;
+    carouselRef.current.scrollLeft = scrollLeft.current - walk;
+  };
 
   const startIndex = selectedDay * 24;
 
@@ -150,7 +176,16 @@ export default function HourlyChart({ forecast, selectedDay, unit = 'C' }) {
   return (
     <div className="chart-container">
       {/* Carosello 24h */}
-      <div className="hourly-carousel" role="list" aria-label="Previsioni orarie">
+      <div 
+        className="hourly-carousel" 
+        role="list" 
+        aria-label="Previsioni orarie"
+        ref={carouselRef}
+        onMouseDown={handleMouseDown}
+        onMouseLeave={handleMouseLeave}
+        onMouseUp={handleMouseUp}
+        onMouseMove={handleMouseMove}
+      >
         {hourlySlots.map((slot, i) => (
           <div
             key={i}

@@ -12,10 +12,10 @@ import ForecastStrip        from './components/ForecastStrip';
 import HourlyChart          from './components/HourlyChart';
 import GeoPanel             from './components/GeoPanel';
 import LocalPanel           from './components/LocalPanel';
-import LanguageSwitcher     from './components/LanguageSwitcher';
+import SettingsMenu         from './components/SettingsMenu';
+import AuthModal            from './components/AuthModal';
 import SkeletonLoader       from './components/SkeletonLoader';
 import SunArcWidget         from './components/SunArcWidget';
-import MeteoGrid            from './components/MeteoGrid';
 import WeatherTips          from './components/WeatherTips';
 
 // ── Persistent recent cities ──────────────────────────────────────
@@ -55,21 +55,32 @@ function useFavorites() {
   return [favorites, toggleFavorite];
 }
 
-// ── Dynamic background class based on weather ─────────────────────
-function getWeatherBgClass(weather, isLightMode) {
-  if (isLightMode || !weather) return '';
-  const id   = weather.weather?.[0]?.id;
-  const icon = weather.weather?.[0]?.icon ?? '';
-  const isNight = icon.endsWith('n');
+// ── Dynamic background ────────────────────────────────────────────────────────────
+function useDynamicBackground(weather, isLightMode) {
+  useEffect(() => {
+    if (!weather) return;
+    const desc = (weather.weather?.[0]?.description ?? '').toLowerCase();
+    let query = 'clear sky';
+    if (desc.includes('pioggia') || desc.includes('rovesci') || desc.includes('pioviggine')) query = 'rain';
+    else if (desc.includes('neve'))                query = 'snow winter';
+    else if (desc.includes('temporale'))           query = 'thunderstorm lightning';
+    else if (desc.includes('nebbia'))              query = 'fog mist atmospheric';
+    else if (desc.includes('nuvoloso') || desc.includes('coperto')) query = 'cloudy overcast';
 
-  if (!id) return '';
-  if (id >= 200 && id < 300) return 'bg-storm';
-  if (id >= 300 && id < 600) return 'bg-rain';
-  if (id >= 600 && id < 700) return 'bg-snow';
-  if (id >= 700 && id < 800) return 'bg-fog';
-  if (id === 800) return isNight ? 'bg-clear-night' : 'bg-clear-day';
-  if (id >= 801 && id <= 804) return isNight ? 'bg-clear-night' : 'bg-cloudy';
-  return '';
+    query += isLightMode ? ' day nature' : ' night city lights';
+
+    axios.get(`/api/background?query=${encodeURIComponent(query)}`)
+      .then(res => {
+        const photos = res.data?.photos;
+        if (photos && photos.length > 0) {
+          const idx = Math.floor(Math.random() * Math.min(3, photos.length));
+          document.body.style.backgroundImage = `url('${photos[idx].src.landscape}')`;
+        }
+      })
+      .catch(() => {
+        document.body.style.backgroundImage = '';
+      });
+  }, [weather, isLightMode]);
 }
 
 // ── Main App ──────────────────────────────────────────────────────
@@ -84,6 +95,10 @@ export default function App() {
   const [unit,        setUnit]        = useState('C');
   const [owmKey,      setOwmKey]      = useState('');
 
+  // Fake Auth State
+  const [user, setUser] = useState(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
   // Fetch OWM key for map tiles
   useEffect(() => {
     axios.get('/api/config')
@@ -96,13 +111,8 @@ export default function App() {
     document.body.classList.toggle('light-mode', isLightMode);
   }, [isLightMode]);
 
-  // Dynamic weather background class
-  useEffect(() => {
-    const bgClasses = ['bg-clear-day','bg-clear-night','bg-rain','bg-storm','bg-snow','bg-fog','bg-cloudy'];
-    bgClasses.forEach(c => document.body.classList.remove(c));
-    const cls = getWeatherBgClass(weather, isLightMode);
-    if (cls) document.body.classList.add(cls);
-  }, [weather, isLightMode]);
+  // Dynamic background
+  useDynamicBackground(weather, isLightMode);
 
   // Update document title
   useEffect(() => {
@@ -130,28 +140,16 @@ export default function App() {
 
       {/* ── Top bar ──────────────────────────────────────────────── */}
       <div className="top-bar">
-        <div className="top-bar-controls" style={{ display: 'flex', gap: '8px' }}>
-          <LanguageSwitcher />
-
-          <button
-            id="theme-toggle"
-            className="control-btn"
-            onClick={() => setIsLightMode(v => !v)}
-            aria-label={isLightMode ? t('theme_switch_dark') : t('theme_switch_light')}
-          >
-            {isLightMode ? <Moon size={16} /> : <Sun size={16} />}
-            {isLightMode ? t('theme_dark') : t('theme_light')}
-          </button>
-
-          <button
-            id="unit-toggle"
-            className="control-btn"
-            onClick={() => setUnit(u => u === 'C' ? 'F' : 'C')}
-            aria-label={`Passa a ${unit === 'C' ? 'Fahrenheit' : 'Celsius'}`}
-          >
-            <Thermometer size={16} />
-            °{unit === 'C' ? 'F' : 'C'}
-          </button>
+        <div className="top-bar-controls">
+          <SettingsMenu 
+            isLightMode={isLightMode} 
+            setIsLightMode={setIsLightMode} 
+            unit={unit} 
+            setUnit={setUnit} 
+            user={user}
+            onOpenAuth={() => setIsAuthOpen(true)}
+            onLogout={() => setUser(null)}
+          />
         </div>
 
         <header className="app-header">
@@ -159,7 +157,7 @@ export default function App() {
           <p className="app-subtitle">{t('app_subtitle')}</p>
         </header>
 
-        <div style={{ width: 140 }} />
+        <div></div>
       </div>
 
       {/* ── Search (with GPS integrated) ─────────────────────────── */}
@@ -238,7 +236,6 @@ export default function App() {
                 onToggleFavorite={() => toggleFavorite(weather.name)}
               />
               <WeatherTips weather={weather} forecast={forecast} airQuality={airQuality} />
-              <MeteoGrid weather={weather} forecast={forecast} airQuality={airQuality} unit={unit} />
               <ForecastStrip
                 forecast={forecast}
                 selectedDay={selectedDay}
@@ -260,6 +257,14 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      <AuthModal 
+        isOpen={isAuthOpen} 
+        onClose={() => setIsAuthOpen(false)} 
+        onLogin={(userData) => {
+          setUser(userData);
+          setIsAuthOpen(false);
+        }}
+      />
     </div>
   );
 }
