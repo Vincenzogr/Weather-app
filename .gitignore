@@ -40,3 +40,13 @@ application-secret.properties
 # Maven portatile locale
 .maven/
 
+
+# Database H2 su file (utenti e preferiti locali)
+/data/
+
+# Artefatti di lavoro della skill di design
+.impeccable/review/
+.impeccable/mocks/
+
+# Playwright MCP (screenshot di verifica)
+.playwright-mcp/
