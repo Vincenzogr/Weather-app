@@ -1,0 +1,770 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-10T12:00:00Z",
+  "title": "Design System: Meteo App",
+  "extensions": {
+    "colorMeta": {
+      "sky-day-top": {
+        "role": "primary",
+        "displayName": "Day Blue (computed sky anchor)",
+        "canonical": "oklch(53.4% 0.168 258.5)",
+        "tonalRamp": [
+          "#00003d",
+          "#001a68",
+          "#003a95",
+          "#165cbe",
+          "#3c80e5",
+          "#65a5ff",
+          "#91cbff",
+          "#bef1ff"
+        ]
+      },
+      "sky-day-horizon": {
+        "role": "primary",
+        "displayName": "Day Horizon (computed sky anchor)",
+        "canonical": "oklch(78.9% 0.088 247.0)",
+        "tonalRamp": [
+          "#000c1f",
+          "#062741",
+          "#1e4566",
+          "#38658d",
+          "#5587b4",
+          "#77aad9",
+          "#9bcfff",
+          "#bff5ff"
+        ]
+      },
+      "sky-night-top": {
+        "role": "primary",
+        "displayName": "Night Indigo (computed sky anchor)",
+        "canonical": "oklch(17.0% 0.065 270.3)",
+        "tonalRamp": [
+          "#040726",
+          "#192244",
+          "#354065",
+          "#535f86",
+          "#7581a5",
+          "#99a4c5",
+          "#bec8e5",
+          "#e5eeff"
+        ]
+      },
+      "sky-night-horizon": {
+        "role": "primary",
+        "displayName": "Night Horizon (computed sky anchor)",
+        "canonical": "oklch(27.2% 0.100 269.2)",
+        "tonalRamp": [
+          "#030034",
+          "#121e55",
+          "#2d3d77",
+          "#4b5e99",
+          "#6d80b7",
+          "#92a3d5",
+          "#b8c8f4",
+          "#e0eeff"
+        ]
+      },
+      "ground-floor": {
+        "role": "neutral",
+        "displayName": "Ground Floor Indigo",
+        "canonical": "oklch(16.6% 0.050 270.6)",
+        "tonalRamp": [
+          "#050820",
+          "#1c233e",
+          "#38415d",
+          "#56607e",
+          "#7781a0",
+          "#9ba4c0",
+          "#c0c9e2",
+          "#e6eeff"
+        ]
+      },
+      "sun-gold": {
+        "role": "secondary",
+        "displayName": "Sun Gold",
+        "canonical": "oklch(86.3% 0.149 84.7)",
+        "tonalRamp": [
+          "#170700",
+          "#372000",
+          "#5a3c00",
+          "#7f5a00",
+          "#a67a00",
+          "#d09c00",
+          "#f6c042",
+          "#ffe66d"
+        ]
+      },
+      "sun-deep": {
+        "role": "secondary",
+        "displayName": "Sun Deep",
+        "canonical": "oklch(74.2% 0.153 74.9)",
+        "tonalRamp": [
+          "#1d0200",
+          "#401900",
+          "#653500",
+          "#8c5200",
+          "#b67100",
+          "#dc9400",
+          "#ffb943",
+          "#ffe07b"
+        ]
+      },
+      "ink-light": {
+        "role": "neutral",
+        "displayName": "Night Ink",
+        "canonical": "oklch(22.1% 0.039 258.3)",
+        "tonalRamp": [
+          "#030b1b",
+          "#192538",
+          "#354357",
+          "#546278",
+          "#74839a",
+          "#96a6be",
+          "#bbcae1",
+          "#e2f0ff"
+        ]
+      },
+      "ink-2-light": {
+        "role": "neutral",
+        "displayName": "Slate Ink 2",
+        "canonical": "oklch(43.3% 0.038 261.5)",
+        "tonalRamp": [
+          "#040b1b",
+          "#1b2538",
+          "#374257",
+          "#556277",
+          "#76839a",
+          "#98a6be",
+          "#bccae3",
+          "#e1efff"
+        ]
+      },
+      "ink-3-light": {
+        "role": "neutral",
+        "displayName": "Slate Ink 3",
+        "canonical": "oklch(50.5% 0.037 261.6)",
+        "tonalRamp": [
+          "#040b1a",
+          "#1b2537",
+          "#374256",
+          "#566277",
+          "#768399",
+          "#99a6bd",
+          "#bccae2",
+          "#e1efff"
+        ]
+      },
+      "page-base-light": {
+        "role": "neutral",
+        "displayName": "Page Base (light, mixed 14% with live horizon)",
+        "canonical": "oklch(96.7% 0.006 264.5)",
+        "tonalRamp": [
+          "#0a0b0e",
+          "#242528",
+          "#404245",
+          "#5f6165",
+          "#808286",
+          "#a3a5a9",
+          "#c7c9cd",
+          "#eceef2"
+        ]
+      },
+      "surface-light": {
+        "role": "neutral",
+        "displayName": "Surface (light, mixed 5% with live horizon)",
+        "canonical": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "surface-2-light": {
+        "role": "neutral",
+        "displayName": "Surface 2 (light, mixed 13% with live horizon)",
+        "canonical": "oklch(97.5% 0.005 258.3)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#242527",
+          "#404244",
+          "#606164",
+          "#818285",
+          "#a3a5a8",
+          "#c7c9cc",
+          "#edeff1"
+        ]
+      },
+      "line-light": {
+        "role": "neutral",
+        "displayName": "Hairline (light, mixed 12% with live sky top)",
+        "canonical": "oklch(91.1% 0.012 259.8)",
+        "tonalRamp": [
+          "#080b10",
+          "#22252b",
+          "#3e4249",
+          "#5d6168",
+          "#7e838a",
+          "#a1a5ad",
+          "#c5c9d1",
+          "#eaeff7"
+        ]
+      },
+      "focus-light": {
+        "role": "neutral",
+        "displayName": "Focus and Link Blue",
+        "canonical": "oklch(49.7% 0.176 260.8)",
+        "tonalRamp": [
+          "#000042",
+          "#00156e",
+          "#00369c",
+          "#1e5ac3",
+          "#407dea",
+          "#6ba3ff",
+          "#96c9ff",
+          "#c2f0ff"
+        ]
+      },
+      "ink-dark": {
+        "role": "neutral",
+        "displayName": "Moonlit Ink",
+        "canonical": "oklch(96.0% 0.009 258.3)",
+        "tonalRamp": [
+          "#090b0f",
+          "#22252a",
+          "#3f4247",
+          "#5e6166",
+          "#7f8388",
+          "#a2a5ab",
+          "#c5c9cf",
+          "#ebeff5"
+        ]
+      },
+      "ink-2-dark": {
+        "role": "neutral",
+        "displayName": "Moonlit Ink 2",
+        "canonical": "oklch(80.8% 0.025 259.8)",
+        "tonalRamp": [
+          "#060b16",
+          "#1e2531",
+          "#3a4250",
+          "#596270",
+          "#7a8392",
+          "#9ca6b5",
+          "#c0cada",
+          "#e5efff"
+        ]
+      },
+      "ink-3-dark": {
+        "role": "neutral",
+        "displayName": "Moonlit Ink 3",
+        "canonical": "oklch(72.2% 0.030 258.4)",
+        "tonalRamp": [
+          "#040b17",
+          "#1c2533",
+          "#384352",
+          "#576272",
+          "#788394",
+          "#9aa6b8",
+          "#becadd",
+          "#e3f0ff"
+        ]
+      },
+      "page-base-dark": {
+        "role": "neutral",
+        "displayName": "Page Base (dark, mixed 26% with live sky top)",
+        "canonical": "oklch(16.7% 0.050 272.5)",
+        "tonalRamp": [
+          "#050820",
+          "#1d233d",
+          "#39405d",
+          "#57607e",
+          "#7881a0",
+          "#9ca4c0",
+          "#c1c8e2",
+          "#e7eeff"
+        ]
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "Surface (dark, mixed 18% with live sky top)",
+        "canonical": "oklch(20.1% 0.058 272.8)",
+        "tonalRamp": [
+          "#050723",
+          "#1c2241",
+          "#384061",
+          "#565f82",
+          "#7781a4",
+          "#9ba4c4",
+          "#c0c8e5",
+          "#e6eeff"
+        ]
+      },
+      "surface-2-dark": {
+        "role": "neutral",
+        "displayName": "Surface 2 (dark, mixed 26% with live sky top)",
+        "canonical": "oklch(23.7% 0.063 272.9)",
+        "tonalRamp": [
+          "#050625",
+          "#1b2243",
+          "#373f64",
+          "#555f86",
+          "#7680a7",
+          "#9aa3c7",
+          "#bfc8e8",
+          "#e6edff"
+        ]
+      },
+      "line-dark": {
+        "role": "neutral",
+        "displayName": "Hairline (dark, mixed 16% with live horizon)",
+        "canonical": "oklch(30.1% 0.060 274.4)",
+        "tonalRamp": [
+          "#060724",
+          "#1c2242",
+          "#383f62",
+          "#575f84",
+          "#7780a7",
+          "#9aa3c8",
+          "#bfc7e9",
+          "#e6edff"
+        ]
+      },
+      "link-dark": {
+        "role": "neutral",
+        "displayName": "Night Link Blue",
+        "canonical": "oklch(80.5% 0.098 261.4)",
+        "tonalRamp": [
+          "#010921",
+          "#122444",
+          "#2a416a",
+          "#456193",
+          "#6182bd",
+          "#83a5e3",
+          "#a6caff",
+          "#caf0ff"
+        ]
+      },
+      "land-ink": {
+        "role": "neutral",
+        "displayName": "Land Ink",
+        "canonical": "oklch(97.5% 0.005 258.3)",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#242527",
+          "#404244",
+          "#606164",
+          "#818285",
+          "#a3a5a8",
+          "#c7c9cc",
+          "#edeff1"
+        ]
+      },
+      "land-ink-2": {
+        "role": "neutral",
+        "displayName": "Land Ink 2 (5:1 floor on ground)",
+        "canonical": "oklch(85.5% 0.017 259.4)",
+        "tonalRamp": [
+          "#070b12",
+          "#20252d",
+          "#3d424b",
+          "#5c626b",
+          "#7c838d",
+          "#9fa5b0",
+          "#c3cad5",
+          "#e8effa"
+        ]
+      },
+      "series-temp": {
+        "role": "tertiary",
+        "displayName": "Temperature Series (dark: #f59a57)",
+        "canonical": "oklch(68.2% 0.153 52.9)",
+        "tonalRamp": [
+          "#240000",
+          "#4a0a00",
+          "#722700",
+          "#9d4300",
+          "#c66306",
+          "#ee863d",
+          "#ffac66",
+          "#ffd599"
+        ]
+      },
+      "series-rain": {
+        "role": "tertiary",
+        "displayName": "Rain Series (dark: #6fa3ff)",
+        "canonical": "oklch(55.7% 0.172 259.7)",
+        "tonalRamp": [
+          "#00003d",
+          "#001a67",
+          "#003995",
+          "#1a5bc0",
+          "#3e7fe7",
+          "#65a4ff",
+          "#90caff",
+          "#bdf0ff"
+        ]
+      },
+      "series-wind": {
+        "role": "tertiary",
+        "displayName": "Wind Series (dark: #45c7b6)",
+        "canonical": "oklch(56.8% 0.097 183.9)",
+        "tonalRamp": [
+          "#00140f",
+          "#00312a",
+          "#005248",
+          "#007267",
+          "#289589",
+          "#53b9ac",
+          "#80ddd0",
+          "#b1fff4"
+        ]
+      },
+      "tone-warning": {
+        "role": "tertiary",
+        "displayName": "Warning (dark: #ff9b8f on #3a1a1d)",
+        "canonical": "oklch(50.0% 0.182 29.5)",
+        "tonalRamp": [
+          "#320000",
+          "#5c0000",
+          "#890000",
+          "#b12015",
+          "#da4a3b",
+          "#fa7867",
+          "#ffa492",
+          "#ffd0bf"
+        ]
+      },
+      "tone-warning-bg": {
+        "role": "tertiary",
+        "displayName": "Warning Tint",
+        "canonical": "oklch(94.7% 0.023 24.1)",
+        "tonalRamp": [
+          "#140707",
+          "#302120",
+          "#4e3d3c",
+          "#6e5c5b",
+          "#907d7c",
+          "#b3a09e",
+          "#d8c4c2",
+          "#fee9e7"
+        ]
+      },
+      "tone-caution": {
+        "role": "tertiary",
+        "displayName": "Caution (dark: #ffd27a on #352a12)",
+        "canonical": "oklch(50.8% 0.108 73.3)",
+        "tonalRamp": [
+          "#1f0100",
+          "#411800",
+          "#633600",
+          "#855600",
+          "#a9772e",
+          "#cd9b56",
+          "#eec085",
+          "#ffe7b3"
+        ]
+      },
+      "tone-caution-bg": {
+        "role": "tertiary",
+        "displayName": "Caution Tint",
+        "canonical": "oklch(96.1% 0.038 86.9)",
+        "tonalRamp": [
+          "#100a01",
+          "#2c2413",
+          "#4a412c",
+          "#6a6049",
+          "#8c8169",
+          "#afa48b",
+          "#d4c8ae",
+          "#f9edd3"
+        ]
+      },
+      "tone-info": {
+        "role": "tertiary",
+        "displayName": "Info (dark: #9cc0ff on #16264a)",
+        "canonical": "oklch(49.7% 0.176 260.8)",
+        "tonalRamp": [
+          "#000042",
+          "#00156e",
+          "#00369c",
+          "#1e5ac3",
+          "#407dea",
+          "#6ba3ff",
+          "#96c9ff",
+          "#c2f0ff"
+        ]
+      },
+      "tone-info-bg": {
+        "role": "tertiary",
+        "displayName": "Info Tint",
+        "canonical": "oklch(94.3% 0.023 258.4)",
+        "tonalRamp": [
+          "#060b15",
+          "#1e2530",
+          "#3b434e",
+          "#59626f",
+          "#7a8390",
+          "#9ca6b4",
+          "#c0cad8",
+          "#e5effe"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Current temperature on the horizon; narrow and light."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "City name on the sky."
+      },
+      "reading": {
+        "displayName": "Reading",
+        "purpose": "Panel hero numbers (AQI, UV)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Panel titles."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Interface text."
+      },
+      "value": {
+        "displayName": "Value",
+        "purpose": "Measured values in definition lists, tabular."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "dt labels, notes; 0.75rem for dates and hints."
+      }
+    },
+    "shadows": [
+      {
+        "name": "panel-light",
+        "value": "0 1px 2px rgb(15 27 45 / 0.05), 0 10px 28px -16px rgb(15 27 45 / 0.22)",
+        "purpose": "Panels, search field, masthead buttons, map controls (light)."
+      },
+      {
+        "name": "panel-dark",
+        "value": "0 1px 2px rgb(0 0 0 / 0.3), 0 14px 32px -18px rgb(0 0 0 / 0.7)",
+        "purpose": "Panels and controls (dark)."
+      },
+      {
+        "name": "floating-light",
+        "value": "0 2px 6px rgb(15 27 45 / 0.08), 0 24px 48px -20px rgb(15 27 45 / 0.35)",
+        "purpose": "Search results, settings, toasts, dialog (light)."
+      },
+      {
+        "name": "floating-dark",
+        "value": "0 2px 8px rgb(0 0 0 / 0.35), 0 28px 56px -24px rgb(0 0 0 / 0.8)",
+        "purpose": "Search results, settings, toasts, dialog (dark)."
+      },
+      {
+        "name": "segment-lift",
+        "value": "0 1px 2px rgb(0 0 0 / 0.1), 0 2px 6px -2px rgb(0 0 0 / 0.12)",
+        "purpose": "Active segmented option."
+      },
+      {
+        "name": "sun-glow",
+        "value": "0 0 0 9px rgb(255 205 90 / 0.16), 0 4px 56px 22px rgb(255 190 70 / 0.34)",
+        "purpose": "Sun disc only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The one easing for sky, panels, popovers and bodies."
+      },
+      {
+        "name": "sky-transition",
+        "value": "700ms",
+        "purpose": "Registered @property transition of --sky-top, --sky-horizon, --sky-ground when the shown hour changes."
+      },
+      {
+        "name": "live-transition",
+        "value": "1.2s",
+        "purpose": "Transition of --live-top and --live-horizon (page tint)."
+      },
+      {
+        "name": "body-move",
+        "value": "0.45s",
+        "purpose": "Sun or moon and knob moving along the arc."
+      },
+      {
+        "name": "control",
+        "value": "0.15s",
+        "purpose": "Background and color changes on controls."
+      },
+      {
+        "name": "pop-in",
+        "value": "0.22s",
+        "purpose": "Settings panel entrance (translateY -4px, scale 0.98)."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0ms",
+        "purpose": "prefers-reduced-motion sets sky transition to 0 and removes all transitions and animations."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "week-compact",
+        "value": "1100px"
+      },
+      {
+        "name": "single-column",
+        "value": "960px"
+      },
+      {
+        "name": "mobile",
+        "value": "720px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Main action; Night Ink in light theme, Sun Gold in dark theme.",
+      "html": "<button class=\"ds-btn-primary\">Search</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 1px solid transparent; border-radius: 10px; background: var(--primary-bg, #0f1b2d); color: var(--primary-ink, #ffffff); font-family: 'Archivo Variable', 'Archivo', system-ui, sans-serif; font-size: 0.9375rem; font-weight: 600; cursor: pointer; transition: background-color 0.15s, transform 0.1s; } .ds-btn-primary:hover { background: color-mix(in oklab, var(--primary-bg, #0f1b2d) 86%, #ffc94d); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 2px solid var(--focus, #1f5bc4); outline-offset: 2px; }"
+    },
+    {
+      "name": "Quiet Button",
+      "kind": "button",
+      "refersTo": "button-quiet",
+      "description": "Secondary action on surfaces.",
+      "html": "<button class=\"ds-btn-quiet\">Cancel</button>",
+      "css": ".ds-btn-quiet { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 18px; border: 1px solid var(--line, #dde2ea); border-radius: 10px; background: var(--surface-2, #f5f7fa); color: var(--ink, #0f1b2d); font-family: 'Archivo Variable', 'Archivo', system-ui, sans-serif; font-size: 0.9375rem; font-weight: 600; cursor: pointer; transition: background-color 0.15s, transform 0.1s; } .ds-btn-quiet:hover { background: color-mix(in oklab, var(--surface-2, #f5f7fa) 80%, var(--ink, #0f1b2d) 6%); } .ds-btn-quiet:active { transform: translateY(1px); } .ds-btn-quiet:focus-visible { outline: 2px solid var(--focus, #1f5bc4); outline-offset: 2px; }"
+    },
+    {
+      "name": "City Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Recent or favorite city; currentColor-based so it works on sky and surface.",
+      "html": "<button class=\"ds-chip\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/><path d=\"M3 3v5h5\"/><path d=\"M12 7v5l4 2\"/></svg>Rome</button>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 13px; border: 1px solid color-mix(in oklab, currentColor 26%, transparent); border-radius: 999px; background: color-mix(in oklab, currentColor 10%, transparent); color: inherit; font-family: 'Archivo Variable', 'Archivo', system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background-color 0.15s; } .ds-chip:hover { background: color-mix(in oklab, currentColor 20%, transparent); } .ds-chip:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Form field in the auth dialog and settings.",
+      "html": "<input class=\"ds-input\" type=\"email\" placeholder=\"name@example.com\">",
+      "css": ".ds-input { width: 100%; min-height: 44px; padding: 0 12px; border: 1px solid var(--line, #dde2ea); border-radius: 10px; background: var(--surface, #ffffff); color: var(--ink, #0f1b2d); font-family: 'Archivo Variable', 'Archivo', system-ui, sans-serif; font-size: 1rem; } .ds-input:focus-visible { outline: 2px solid var(--focus, #1f5bc4); outline-offset: 0; border-color: transparent; } .ds-input[aria-invalid='true'] { border-color: var(--tone-warning, #b42318); }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "nav",
+      "refersTo": "segmented-option-active",
+      "description": "Theme, units, language, chart series and radar layer switches.",
+      "html": "<div class=\"ds-seg\" role=\"radiogroup\"><button class=\"ds-seg__opt is-active\" role=\"radio\" aria-checked=\"true\">Temperature</button><button class=\"ds-seg__opt\" role=\"radio\" aria-checked=\"false\">Rain</button><button class=\"ds-seg__opt\" role=\"radio\" aria-checked=\"false\">Wind</button></div>",
+      "css": ".ds-seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line, #dde2ea); border-radius: 10px; background: var(--surface-2, #f5f7fa); font-family: 'Archivo Variable', 'Archivo', system-ui, sans-serif; } .ds-seg__opt { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0 12px; border: 0; border-radius: 7px; background: transparent; color: var(--ink-2, #455166); font: inherit; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background-color 0.15s, color 0.15s; } .ds-seg__opt:hover { color: var(--ink, #0f1b2d); } .ds-seg__opt.is-active { background: var(--surface, #ffffff); color: var(--ink, #0f1b2d); font-weight: 650; box-shadow: 0 1px 2px rgb(0 0 0 / 0.1), 0 2px 6px -2px rgb(0 0 0 / 0.12); } .ds-seg__opt:focus-visible { outline: 2px solid var(--focus, #1f5bc4); outline-offset: 1px; }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Solid sky-tinted surface for every dashboard module.",
+      "html": "<section class=\"ds-panel\"><h2 class=\"ds-panel__title\">Air quality</h2><div class=\"ds-panel__reading\">31</div><dl class=\"ds-panel__stats\"><div><dt>PM2.5</dt><dd>10.4</dd></div><div><dt>PM10</dt><dd>10.5</dd></div></dl></section>",
+      "css": ".ds-panel { padding: 20px 22px 22px; border: 1px solid var(--line, #dde2ea); border-radius: 14px; background: var(--surface, #ffffff); color: var(--ink, #0f1b2d); box-shadow: var(--shadow, 0 1px 2px rgb(15 27 45 / 0.05), 0 10px 28px -16px rgb(15 27 45 / 0.22)); font-family: 'Archivo Variable', 'Archivo', system-ui, sans-serif; } .ds-panel__title { margin: 0 0 14px; font-size: 1.0625rem; font-weight: 650; letter-spacing: -0.01em; } .ds-panel__reading { font-size: 2.75rem; font-weight: 300; font-stretch: 76%; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; } .ds-panel__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; margin: 16px 0 0; } .ds-panel__stats dt { color: var(--ink-3, #59657a); font-size: 0.8125rem; } .ds-panel__stats dd { margin: 0; font-size: 1.0625rem; font-weight: 600; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Sky Hero",
+      "kind": "custom",
+      "refersTo": "sky",
+      "description": "Signature: computed sky above, ground band below the horizon at 74%, temperature resting on the horizon.",
+      "html": "<div class=\"ds-sky\"><div class=\"ds-sky__city\">New York</div><div class=\"ds-sky__temp\">22<span>°C</span></div><span class=\"ds-sky__sun\"></span><div class=\"ds-sky__land\"><span class=\"ds-sky__label\">Feels like</span> 21°</div></div>",
+      "css": ".ds-sky { position: relative; height: 360px; overflow: hidden; color: var(--sky-ink, #ffffff); font-family: 'Archivo Variable', 'Archivo', system-ui, sans-serif; background: linear-gradient(to bottom, var(--sky-top, #2569cc) 0%, var(--sky-horizon, #8cc0f0) 74%, var(--sky-ground, #1c2a3a) 74%, color-mix(in oklab, var(--sky-ground, #1c2a3a) 88%, #070c24) 100%); } .ds-sky__city { position: absolute; top: 24px; left: 24px; color: var(--sky-ink-top, #ffffff); font-size: 2.25rem; font-weight: 650; font-stretch: 90%; letter-spacing: -0.025em; line-height: 1.05; } .ds-sky__temp { position: absolute; left: 24px; bottom: 26%; font-size: 5rem; font-weight: 260; font-stretch: 72%; letter-spacing: -0.04em; line-height: 0.8; } .ds-sky__temp span { font-size: 0.3em; font-weight: 450; font-stretch: 100%; vertical-align: top; } .ds-sky__sun { position: absolute; left: 62%; top: 30%; width: 28px; height: 28px; border-radius: 50%; background: radial-gradient(circle at 38% 36%, #fff7da 0%, #ffc94d 48%, #f2a516 100%); box-shadow: 0 0 0 9px rgb(255 205 90 / 0.16), 0 4px 56px 22px rgb(255 190 70 / 0.34); transition: left 0.45s cubic-bezier(0.16, 1, 0.3, 1), top 0.45s cubic-bezier(0.16, 1, 0.3, 1); } .ds-sky__sun:hover { top: 26%; } .ds-sky__land { position: absolute; top: 74%; left: 24px; padding-top: 14px; color: #f5f7fa; font-size: 1.0625rem; font-weight: 600; } .ds-sky__label { display: block; color: #c9d0db; font-size: 0.75rem; font-weight: 400; }"
+    },
+    {
+      "name": "Hour Scrubber Cell",
+      "kind": "custom",
+      "refersTo": "scrubber",
+      "description": "Signature: hour cells on the ground band; selected hour gets a Sun Gold underline, the current hour a Sun Gold time.",
+      "html": "<div class=\"ds-scrub\"><button class=\"ds-scrub__hour is-now\"><span class=\"ds-scrub__time\">13</span><span class=\"ds-scrub__temp\">21°</span></button><button class=\"ds-scrub__hour is-selected\"><span class=\"ds-scrub__time\">14</span><span class=\"ds-scrub__temp\">21°</span></button><button class=\"ds-scrub__hour\"><span class=\"ds-scrub__time\">15</span><span class=\"ds-scrub__temp\">20°</span></button></div>",
+      "css": ".ds-scrub { display: grid; grid-template-columns: repeat(3, 44px); padding: 12px; background: var(--sky-ground, #1c2a3a); color: #f5f7fa; font-family: 'Archivo Variable', 'Archivo', system-ui, sans-serif; font-variant-numeric: tabular-nums; } .ds-scrub__hour { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 0 9px; border: 0; border-radius: 10px; background: transparent; color: inherit; font: inherit; cursor: ew-resize; transition: background-color 0.2s; } .ds-scrub__hour:hover { background: rgb(255 255 255 / 0.06); } .ds-scrub__hour:focus-visible { outline: 2px solid #ffc94d; outline-offset: 2px; } .ds-scrub__time { color: #c9d0db; font-size: 0.75rem; } .ds-scrub__hour.is-now .ds-scrub__time { color: #ffc94d; font-weight: 700; } .ds-scrub__temp { font-size: 0.9375rem; font-weight: 650; } .ds-scrub__hour.is-selected { background: color-mix(in oklab, var(--sky-horizon, #8cc0f0) 10%, rgb(255 255 255 / 0.06)); box-shadow: inset 0 0 0 1px color-mix(in oklab, #f5f7fa 18%, transparent); } .ds-scrub__hour.is-selected::after { content: ''; position: absolute; left: 22%; right: 22%; bottom: 0; height: 3px; border-radius: 3px; background: #ffc94d; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Cielo vivo (the living sky)",
+    "overview": "The page is the sky above the searched city at the hour on screen. Its colors are not chosen per theme; they are computed per hour from the sun's real altitude, the weather condition and the cloud cover, then written as custom properties on <html> and animated through registered @property colors. A full-bleed sky band carries the city, the local time, the sun or moon on its real arc, and the temperature resting on the horizon. Below the horizon a deep ground band of the same sky holds the secondary readings and the 24-hour scrubber; dragging the scrubber recolors the whole page.\n\nEverything beneath the sky is solid: dilute tints of the live sky on page, surfaces and hairline rules, no translucent tiles and no decorative blur. Density is high and deliberate (week, hourly chart, air, UV, sun and moon, details, radar, tips), organized into flat panels with one shared type family whose width axis does the expressive work: condensed light numerals for readings, regular widths for interface text. Sun-gold is the one warm voice and it means \"here\": selection, the current hour, the scrubber handle, the city marker.\n\nThe world rejects the weather-app category's fixed dark-glass gradient with translucent cards. Theme is auto (follows the city's real sky: dark when the sun is below about -6 degrees), light or dark, exposed as html[data-theme]; html[data-sky-top-ink] records whether the upper sky needs light or dark text.",
+    "keyCharacteristics": [
+      "Sky colors are computed data, never fixed palette picks; contrast is guaranteed by the algorithm, not by luck.",
+      "One family, Archivo variable (wdth 62-125, wght 100-900), self-hosted; width and weight carry the hierarchy.",
+      "Solid surfaces tinted by the live sky; hairline rules; soft two-layer shadows only.",
+      "Sun-gold marks selection and \"now\"; it is rare everywhere else.",
+      "Lucide line icons in a single stroke (1.75).",
+      "Motion follows the sky: 700ms sky transitions, 1.2s for the live tint, one expo-out easing; all of it collapses under reduced motion."
+    ],
+    "rules": [
+      {
+        "name": "The Computed Sky Rule",
+        "body": "Sky colors come from computeSky() (sun altitude, dawn or dusk, condition, cloud cover). Never hardcode a sky color on a surface; read the custom properties.",
+        "section": "colors"
+      },
+      {
+        "name": "The Guaranteed Ink Rule",
+        "body": "Text on the sky picks white or dark ink by worst-case contrast across sampled probes, and the sky itself is nudged darker or lighter in 6% steps until text reaches 4.6:1. The upper sky (city, masthead) and the horizon zone (temperature) are solved separately.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ground Band Rule",
+        "body": "Below the horizon (74% of the band) the sky becomes ground: a deep tint of the same sky (horizon mixed 35% toward top), darkened toward Ground Floor only until secondary land text reaches 5:1. This is a cited adaptation for legibility, not a second palette; do not lighten it for looks.",
+        "section": "colors"
+      },
+      {
+        "name": "The Same Sky Below Rule",
+        "body": "Every surface under the hero is a solid, dilute tint of the live sky. No glass, no translucency over content, no decorative blur.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Sun Rule",
+        "body": "Sun-gold means selection, \"now\" or \"here\". Do not spend it on decoration or headings.",
+        "section": "colors"
+      },
+      {
+        "name": "The Width Axis Rule",
+        "body": "Hierarchy is carried by width and weight of the one family. Numbers that are read at a glance go narrow and light; values that are compared go tabular. Do not introduce a second display face.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Numbers Rule",
+        "body": "Times, temperatures, hours and measurements use tabular-nums so columns and the scrubber never jitter.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Panel Rule",
+        "body": "Panels are solid surface with a 1px sky-tinted line and the Panel shadow. Floating shadow is reserved for things that sit above the page (menus, toasts, dialog).",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do read sky colors from --sky-* and --live-* and let computeSky() decide them; extend its stops or weather tints rather than painting a surface by hand.",
+      "Do keep text on the sky at 4.6:1 or better and secondary land text at 5:1 on the ground band, solved by the algorithm.",
+      "Do build every new surface as a solid fixed base mixed in oklab with the live sky, with a 1px sky-tinted line.",
+      "Do use Sun Gold only for selection, \"now\", the scrubber handle and location markers.",
+      "Do set readings in narrow light Archivo and comparable values in tabular figures.",
+      "Do draw icons with Lucide at strokeWidth 1.75.",
+      "Do animate with the one expo-out easing (cubic-bezier(0.16, 1, 0.3, 1)) and honor reduced motion by removing transitions.",
+      "Do keep controls at 44px minimum and the 2px offset focus outline."
+    ],
+    "donts": [
+      "Don't reintroduce the fixed dark-glass gradient with translucent tiles or decorative blur.",
+      "Don't apply CSS filters to map tiles or let Leaflet's default plus-lighter tile blending through.",
+      "Don't lighten the ground band below its 5:1 floor for aesthetic reasons.",
+      "Don't spend Sun Gold on headings, decoration or large fills.",
+      "Don't use data-series hues (temperature, rain, wind) as brand or status colors.",
+      "Don't add hard offset shadows; elevation is soft and ambient."
+    ]
+  }
+}
