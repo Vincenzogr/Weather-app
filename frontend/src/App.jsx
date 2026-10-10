@@ -1,270 +1,349 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Sun, Moon, Thermometer, AlertTriangle } from 'lucide-react';
-import axios from 'axios';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { useWeatherData }   from './hooks/useWeatherData';
-import SearchBar            from './components/SearchBar';
-import RecentCities         from './components/RecentCities';
-import WeatherCard          from './components/WeatherCard';
-import ForecastStrip        from './components/ForecastStrip';
-import HourlyChart          from './components/HourlyChart';
-import GeoPanel             from './components/GeoPanel';
-import LocalPanel           from './components/LocalPanel';
-import SettingsMenu         from './components/SettingsMenu';
-import AuthModal            from './components/AuthModal';
-import SkeletonLoader       from './components/SkeletonLoader';
-import SunArcWidget         from './components/SunArcWidget';
-import WeatherTips          from './components/WeatherTips';
+import { useAuth } from './auth/useAuth';
+import { useWeatherData } from './hooks/useWeatherData';
+import { useFavorites } from './hooks/useFavorites';
+import { useBackgroundPhoto } from './hooks/useBackgroundPhoto';
+import { usePersistentState } from './hooks/usePersistentState';
+import { useNow } from './hooks/useNow';
+import { useToast } from './components/toast/ToastContext';
 
-// ── Persistent recent cities ──────────────────────────────────────
-function useRecentCities() {
-  const [recentCities, setRecentCities] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('recentCities') ?? '[]'); }
-    catch { return []; }
-  });
+import BrandMark from './components/top/BrandMark';
+import SearchBar from './components/top/SearchBar';
+import SettingsMenu from './components/top/SettingsMenu';
+import CityChips from './components/top/CityChips';
+import SkyHero from './components/sky/SkyHero';
+import EmptyHero from './components/sky/EmptyHero';
+import HourScrubber from './components/sky/HourScrubber';
+import WeekPanel from './components/panels/WeekPanel';
+import TipsPanel from './components/panels/TipsPanel';
+import AirPanel from './components/panels/AirPanel';
+import SunMoonPanel from './components/panels/SunMoonPanel';
+import DetailsPanel from './components/panels/DetailsPanel';
+import AuthDialog from './components/AuthDialog';
 
-  const addCity = useCallback((city) => {
-    setRecentCities(prev => {
-      const updated = [city, ...prev.filter(c => c !== city)].slice(0, 5);
-      localStorage.setItem('recentCities', JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
+import { buildTimeline, momentView } from './utils/timeline';
+import { computeSky } from './utils/sky';
+import { sunAltitude } from './utils/astro';
+import { formatTemp, localHour } from './utils/weather';
+import { cityKey as keyOfCity, cityLabel, sameCity } from './utils/cityKey';
 
-  return [recentCities, addCity];
+const HourlyChartPanel = lazy(() => import('./components/panels/HourlyChartPanel'));
+const RadarPanel = lazy(() => import('./components/panels/RadarPanel'));
+
+const LIVE = { live: true, day: 0, hour: 0 };
+const MAX_RECENT = 6;
+
+/** Cielo di chi visita, quando non c'è ancora una città: posizione stimata dal fuso orario. */
+function visitorSkyAt(now) {
+  const lat = 42;
+  const lon = -new Date(now).getTimezoneOffset() / 4;
+  const sunAlt = sunAltitude(now, lat, lon);
+  const rising = sunAltitude(now + 600_000, lat, lon) > sunAlt;
+  const sky = computeSky({ sunAlt, rising, category: 'few-clouds', cloudCover: 20 });
+  return { lat, lon, now, sky, starsOpacity: Math.max(0, (sky.darkness - 0.45) / 0.55) };
 }
 
-// ── Favorites hook ────────────────────────────────────────────────
-function useFavorites() {
-  const [favorites, setFavorites] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('favoriteCities') ?? '[]'); }
-    catch { return []; }
-  });
-
-  const toggleFavorite = useCallback((city) => {
-    setFavorites(prev => {
-      const exists = prev.includes(city);
-      const updated = exists ? prev.filter(c => c !== city) : [city, ...prev].slice(0, 10);
-      localStorage.setItem('favoriteCities', JSON.stringify(updated));
-      return updated;
-    });
-  }, []);
-
-  return [favorites, toggleFavorite];
+function PanelFallback({ className }) {
+  return <div className={`panel panel--loading ${className}`} aria-hidden="true" />;
 }
 
-// ── Dynamic background ────────────────────────────────────────────────────────────
-function useDynamicBackground(weather, isLightMode) {
-  useEffect(() => {
-    if (!weather) return;
-    const desc = (weather.weather?.[0]?.description ?? '').toLowerCase();
-    let query = 'clear sky';
-    if (desc.includes('pioggia') || desc.includes('rovesci') || desc.includes('pioviggine')) query = 'rain';
-    else if (desc.includes('neve'))                query = 'snow winter';
-    else if (desc.includes('temporale'))           query = 'thunderstorm lightning';
-    else if (desc.includes('nebbia'))              query = 'fog mist atmospheric';
-    else if (desc.includes('nuvoloso') || desc.includes('coperto')) query = 'cloudy overcast';
-
-    query += isLightMode ? ' day nature' : ' night city lights';
-
-    axios.get(`/api/background?query=${encodeURIComponent(query)}`)
-      .then(res => {
-        const photos = res.data?.photos;
-        if (photos && photos.length > 0) {
-          const idx = Math.floor(Math.random() * Math.min(3, photos.length));
-          document.body.style.backgroundImage = `url('${photos[idx].src.landscape}')`;
-        }
-      })
-      .catch(() => {
-        document.body.style.backgroundImage = '';
-      });
-  }, [weather, isLightMode]);
-}
-
-// ── Main App ──────────────────────────────────────────────────────
 export default function App() {
   const { t, i18n } = useTranslation();
-  const { weather, forecast, airQuality, loading, error, handleSearch } = useWeatherData();
-  const [recentCities, addCity] = useRecentCities();
-  const [favorites, toggleFavorite] = useFavorites();
+  const notify = useToast();
+  const { user, logout } = useAuth();
+  const { status, data, error, load, retry } = useWeatherData(i18n.resolvedLanguage);
+  const { favorites, loaded: favoritesLoaded, toggle: toggleFavoriteCity, isFavorite } = useFavorites(user);
 
-  const [selectedDay, setSelectedDay] = useState(0);
-  const [isLightMode, setIsLightMode] = useState(false);
-  const [unit,        setUnit]        = useState('C');
-  const [owmKey,      setOwmKey]      = useState('');
+  const [theme, setTheme] = usePersistentState('meteo.theme', 'auto');
+  const [units, setUnits] = usePersistentState('meteo.units', 'metric');
+  const [recent, setRecent] = usePersistentState('meteo.recent', []);
+  const [cursor, setCursor] = useState(LIVE);
+  const [authState, setAuthState] = useState({ open: false, reason: null, pendingFavorite: null });
+  const [locating, setLocating] = useState(false);
+  const [lastQuery, setLastQuery] = useState(null);
+  const searchRef = useRef(null);
+  const pendingFavorite = useRef(null);
+  const now = useNow();
 
-  // Fake Auth State
-  const [user, setUser] = useState(null);
-  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  // ── Dati derivati ───────────────────────────────────────────────────
+  const timeline = useMemo(() => (data ? buildTimeline(data.forecast) : null), [data]);
+  const liveMoment = useMemo(
+    () => (data && timeline ? momentView({ data, timeline, cursor: LIVE, now, t }) : null),
+    [data, timeline, now, t],
+  );
+  const moment = useMemo(() => {
+    if (!data || !timeline) return null;
+    return cursor.live ? liveMoment : momentView({ data, timeline, cursor, now, t });
+  }, [data, timeline, cursor, liveMoment, now, t]);
+  const liveHour = timeline ? localHour(now, timeline.offset) : 0;
+  const visitorSky = useMemo(() => visitorSkyAt(now), [now]);
 
-  // Fetch OWM key for map tiles
+  const shownSky = moment?.sky ?? visitorSky.sky;
+  const realSky = liveMoment?.sky ?? visitorSky.sky;
+  const resolvedTheme = theme === 'auto' ? (realSky.darkness > 0.5 ? 'dark' : 'light') : theme;
+
+  const photo = useBackgroundPhoto(
+    liveMoment?.category,
+    liveMoment?.sky.isNight ?? false,
+    data?.weather?.name,
+  );
+
+  // ── Effetti sul documento: colori del cielo, tema, titolo ───────────
   useEffect(() => {
-    axios.get('/api/config')
-      .then(res => setOwmKey(res.data?.owmApiKey ?? ''))
-      .catch(() => {});
+    const root = document.documentElement;
+    root.dataset.theme = resolvedTheme;
+    root.style.setProperty('--sky-top', shownSky.top);
+    root.style.setProperty('--sky-horizon', shownSky.horizon);
+    root.style.setProperty('--sky-ground', shownSky.ground);
+    root.style.setProperty('--sky-ink', shownSky.ink);
+    root.style.setProperty('--sky-ink-top', shownSky.inkTop);
+    root.dataset.skyTopInk = shownSky.inkTop === '#FFFFFF' ? 'light' : 'dark';
+    root.style.setProperty('--live-top', realSky.top);
+    root.style.setProperty('--live-horizon', realSky.horizon);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', shownSky.top);
+  }, [resolvedTheme, shownSky, realSky]);
+
+  useEffect(() => {
+    document.title = data && liveMoment
+      ? `${formatTemp(liveMoment.temp, units)} ${data.weather.name} · ${t('app_title')}`
+      : `${t('app_title')} · ${t('app_tagline')}`;
+  }, [data, liveMoment, units, t]);
+
+  // ── Azioni ──────────────────────────────────────────────────────────
+  const rememberCity = useCallback((weather) => {
+    const key = keyOfCity(weather);
+    setRecent((list) => [key, ...list.filter((c) => !sameCity(c, key))].slice(0, MAX_RECENT));
+  }, [setRecent]);
+
+  const search = useCallback(async (city) => {
+    setLastQuery(city);
+    setCursor(LIVE);
+    const weather = await load({ city });
+    if (weather) rememberCity(weather);
+  }, [load, rememberCity]);
+
+  const locate = useCallback(() => {
+    if (!navigator.geolocation) {
+      notify(t('errors.GEO_UNAVAILABLE'), { tone: 'error' });
+      return;
+    }
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        setCursor(LIVE);
+        setLastQuery(null);
+        const weather = await load({ lat: coords.latitude, lon: coords.longitude });
+        setLocating(false);
+        if (weather) rememberCity(weather);
+      },
+      (geoError) => {
+        setLocating(false);
+        notify(t(geoError.code === 1 ? 'errors.GEO_DENIED' : 'errors.GEO_UNAVAILABLE'), { tone: 'error' });
+      },
+      { timeout: 10_000, maximumAge: 300_000 },
+    );
+  }, [load, notify, rememberCity, t]);
+
+  // Chi torna trova l'ultima città cercata.
+  const restored = useRef(false);
+  useEffect(() => {
+    if (restored.current) return;
+    restored.current = true;
+    if (recent[0]) search(recent[0].split('#')[0]);
+  }, [recent, search]);
+
+  // Errore con dati già a schermo: avviso discreto, i dati restano.
+  useEffect(() => {
+    if (error && data) notify(t(`errors.${error}`, { defaultValue: t('errors.INTERNAL_ERROR') }), { tone: 'error' });
+  }, [error, data, notify, t]);
+
+  // "/" porta alla ricerca.
+  useEffect(() => {
+    const onKey = (event) => {
+      const tag = event.target.tagName;
+      if (event.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(tag) && !event.target.isContentEditable) {
+        event.preventDefault();
+        searchRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  // Theme class
-  useEffect(() => {
-    document.body.classList.toggle('light-mode', isLightMode);
-  }, [isLightMode]);
+  const selectDay = useCallback((day) => {
+    setCursor(day === 0 ? LIVE : { live: false, day, hour: liveHour });
+  }, [liveHour]);
 
-  // Dynamic background
-  useDynamicBackground(weather, isLightMode);
+  const scrub = useCallback(({ day, hour }) => {
+    setCursor(day === 0 && hour === liveHour ? LIVE : { live: false, day, hour });
+  }, [liveHour]);
 
-  // Update document title
-  useEffect(() => {
-    if (weather) {
-      document.title = `${Math.round(weather.main?.temp)}° ${weather.name} — Meteo App`;
-    } else {
-      document.title = '🌦️ Meteo App — Previsioni in Tempo Reale';
+  const cityKey = data ? keyOfCity(data.weather) : null;
+  const cityIsFavorite = cityKey ? isFavorite(cityKey) : false;
+
+  const applyFavorite = useCallback(async (city) => {
+    try {
+      const { added } = await toggleFavoriteCity(city);
+      notify(t(added ? 'favorite_added' : 'favorite_removed', { city: cityLabel(city) }), { tone: 'success' });
+    } catch ({ code }) {
+      notify(t(`errors.${code}`, { defaultValue: t('errors.INTERNAL_ERROR') }), { tone: 'error' });
     }
-  }, [weather]);
+  }, [toggleFavoriteCity, notify, t]);
 
-  // Reset selected day on new city
-  useEffect(() => { setSelectedDay(0); }, [weather]);
+  const onToggleFavorite = useCallback(() => {
+    if (!cityKey) return;
+    if (!user) {
+      setAuthState({ open: true, reason: 'favorite', pendingFavorite: cityKey });
+      return;
+    }
+    applyFavorite(cityKey);
+  }, [cityKey, user, applyFavorite]);
 
-  const onSearch = useCallback(async (city) => {
-    const canonical = await handleSearch(city);
-    if (canonical) addCity(canonical);
-  }, [handleSearch, addCity]);
+  const onAuthSuccess = useCallback((signedIn, mode) => {
+    pendingFavorite.current = authState.pendingFavorite;
+    setAuthState({ open: false, reason: null, pendingFavorite: null });
+    notify(t(mode === 'register' ? 'welcome_new' : 'welcome_back', { name: signedIn.name }), { tone: 'success' });
+  }, [authState.pendingFavorite, notify, t]);
 
-  const isFavorite = weather ? favorites.includes(weather.name) : false;
+  // Il preferito chiesto prima del login si salva quando la lista dell'utente è caricata.
+  useEffect(() => {
+    const city = pendingFavorite.current;
+    if (!city || !user || !favoritesLoaded) return;
+    pendingFavorite.current = null;
+    if (!isFavorite(city)) applyFavorite(city);
+  }, [user, favoritesLoaded, isFavorite, applyFavorite]);
 
-  const showResults = weather && forecast && !loading;
+  const onLogout = useCallback(() => {
+    logout();
+    notify(t('logged_out'));
+  }, [logout, notify, t]);
+
+  const busy = status === 'loading';
+  const dayIndex = cursor.live ? 0 : cursor.day;
+  const selectedHour = cursor.live ? liveHour : cursor.hour;
 
   return (
-    <div className="app-container">
+    <>
+      <a className="skip-link" href="#dashboard">{t('skip_to_content')}</a>
 
-      {/* ── Top bar ──────────────────────────────────────────────── */}
-      <div className="top-bar">
-        <div className="top-bar-controls">
-          <SettingsMenu 
-            isLightMode={isLightMode} 
-            setIsLightMode={setIsLightMode} 
-            unit={unit} 
-            setUnit={setUnit} 
+      <header className="masthead">
+        <div className="topbar container">
+          <a className="brand" href="/" aria-label={t('app_title')}>
+            <BrandMark />
+            <span className="brand__name">{t('app_title')}</span>
+          </a>
+          <SearchBar onSearch={search} onLocate={locate} locating={locating} inputRef={searchRef} />
+          <SettingsMenu
             user={user}
-            onOpenAuth={() => setIsAuthOpen(true)}
-            onLogout={() => setUser(null)}
+            onLogin={() => setAuthState({ open: true, reason: null, pendingFavorite: null })}
+            onLogout={onLogout}
+            theme={theme}
+            setTheme={setTheme}
+            units={units}
+            setUnits={setUnits}
           />
         </div>
+        <CityChips favorites={favorites} recent={recent} onSelect={search} />
+      </header>
 
-        <header className="app-header">
-          <h1 className="app-title">🌦 {t('app_title')}</h1>
-          <p className="app-subtitle">{t('app_subtitle')}</p>
-        </header>
+      <main>
+        {data && moment ? (
+          <>
+            <SkyHero
+              data={data}
+              timeline={timeline}
+              cursor={cursor}
+              moment={moment}
+              units={units}
+              photo={photo}
+              isFavorite={cityIsFavorite}
+              onToggleFavorite={onToggleFavorite}
+              onBackToNow={() => setCursor(LIVE)}
+              busy={busy}
+            />
+            <HourScrubber
+              forecast={data.forecast}
+              timeline={timeline}
+              cursor={cursor}
+              liveHour={liveHour}
+              onScrub={scrub}
+              units={units}
+            />
 
-        <div></div>
-      </div>
-
-      {/* ── Search (with GPS integrated) ─────────────────────────── */}
-      <SearchBar onSearch={onSearch} />
-
-      {/* ── Favorites bar ────────────────────────────────────────── */}
-      {favorites.length > 0 && (
-        <div className="favorites-bar">
-          <span className="favorites-label">⭐ {t('favorites', 'Preferiti')}</span>
-          {favorites.map(city => (
-            <button key={city} className="favorite-chip" onClick={() => onSearch(city)}>
-              ⭐ {city}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* ── Recent cities ────────────────────────────────────────── */}
-      <RecentCities cities={recentCities} onSelect={onSearch} />
-
-      {/* ── Error ────────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {error && (
-          <motion.div
-            className="error-message"
-            role="alert"
-            initial={{ opacity: 0, scale: 0.95, y: -8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.2 }}
-          >
-            <AlertTriangle size={18} />
-            {error}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Skeleton loading ─────────────────────────────────────── */}
-      <AnimatePresence>
-        {loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <SkeletonLoader />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* ── Weather results ───────────────────────────────────────── */}
-      <AnimatePresence mode="wait">
-        {showResults && (
-          <motion.div
-            key={weather.id}
-            className="weather-layout"
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -16 }}
-            transition={{ duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] }}
-          >
-            {/* Left — Geographic info & Sun Arc */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <GeoPanel weather={weather} forecast={forecast} airQuality={airQuality} />
-              <SunArcWidget weather={weather} />
+            <div id="dashboard" className="dashboard container" aria-busy={busy} tabIndex={-1}>
+              <div className="dashboard__main">
+                <WeekPanel
+                  forecast={data.forecast}
+                  timeline={timeline}
+                  selectedDay={dayIndex}
+                  onSelectDay={selectDay}
+                  units={units}
+                  currentTemp={liveMoment?.temp}
+                />
+                <Suspense fallback={<PanelFallback className="chart-panel" />}>
+                  <HourlyChartPanel
+                    forecast={data.forecast}
+                    timeline={timeline}
+                    dayIndex={dayIndex}
+                    selectedHour={selectedHour}
+                    units={units}
+                    theme={resolvedTheme}
+                  />
+                </Suspense>
+                <Suspense fallback={<PanelFallback className="radar" />}>
+                  <RadarPanel
+                    lat={data.weather.coord.lat}
+                    lon={data.weather.coord.lon}
+                    cityName={data.weather.name}
+                  />
+                </Suspense>
+              </div>
+              <div className="dashboard__side">
+                <TipsPanel weather={data.weather} forecast={data.forecast} air={data.air} />
+                <AirPanel air={data.air} />
+                <SunMoonPanel
+                  forecast={data.forecast}
+                  timeline={timeline}
+                  dayIndex={dayIndex}
+                  air={data.air}
+                  epoch={moment.epoch}
+                  southern={data.weather.coord.lat < 0}
+                />
+                <DetailsPanel weather={data.weather} units={units} />
+              </div>
             </div>
-
-            {/* Center — Main data */}
-            <div className="center-panel">
-              <WeatherCard
-                weather={weather}
-                forecast={forecast}
-                unit={unit}
-                isFavorite={isFavorite}
-                onToggleFavorite={() => toggleFavorite(weather.name)}
-              />
-              <WeatherTips weather={weather} forecast={forecast} airQuality={airQuality} />
-              <ForecastStrip
-                forecast={forecast}
-                selectedDay={selectedDay}
-                onSelectDay={setSelectedDay}
-                unit={unit}
-              />
-              <HourlyChart
-                forecast={forecast}
-                selectedDay={selectedDay}
-                unit={unit}
-              />
-            </div>
-
-            {/* Right — Local info + radar */}
-            <div>
-              <LocalPanel weather={weather} owmKey={owmKey} />
-            </div>
-          </motion.div>
+          </>
+        ) : (
+          <EmptyHero
+            status={status}
+            error={error}
+            query={lastQuery}
+            onSearch={search}
+            onLocate={locate}
+            locating={locating}
+            onRetry={retry}
+            visitorSky={visitorSky}
+          />
         )}
-      </AnimatePresence>
+      </main>
 
-      <AuthModal 
-        isOpen={isAuthOpen} 
-        onClose={() => setIsAuthOpen(false)} 
-        onLogin={(userData) => {
-          setUser(userData);
-          setIsAuthOpen(false);
-        }}
+      <footer className="footer container">
+        <p>{t('footer_sources')}{' '}
+          <a href="https://openweathermap.org/" target="_blank" rel="noreferrer">OpenWeather</a>,{' '}
+          <a href="https://open-meteo.com/" target="_blank" rel="noreferrer">Open-Meteo</a>,{' '}
+          <a href="https://www.pexels.com/" target="_blank" rel="noreferrer">Pexels</a>.
+        </p>
+        <p>{t('footer_author')}</p>
+      </footer>
+
+      <AuthDialog
+        open={authState.open}
+        reason={authState.reason}
+        onClose={() => setAuthState({ open: false, reason: null, pendingFavorite: null })}
+        onSuccess={onAuthSuccess}
       />
-    </div>
+    </>
   );
 }

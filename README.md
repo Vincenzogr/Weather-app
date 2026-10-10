@@ -1,202 +1,176 @@
-# 🌦️ Weather App
+# 🌦️ Meteo App
 
-> Applicazione meteo **full-stack professionale** sviluppata da Granata Vincenzo.
-> Backend Spring Boot · Frontend React + Vite · Design glassmorphism premium
+> Applicazione meteo **full-stack** sviluppata da Granata Vincenzo.
+> Backend Spring Boot · Frontend React + Vite · Design "Cielo vivo"
 
-![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.5-6DB33F?style=flat-square&logo=spring-boot)
+![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-6DB33F?style=flat-square&logo=spring-boot)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat-square&logo=vite)
-![Java](https://img.shields.io/badge/Java-17-ED8B00?style=flat-square&logo=openjdk)
+![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=flat-square&logo=openjdk)
 ![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)
 
 ---
 
-## ✨ Funzionalità
+## ✨ L'idea: il cielo della città, ora per ora
+
+La pagina prende il colore del cielo della città cercata **nell'ora mostrata**: il colore
+è calcolato dall'altitudine reale del sole (alba, ora dorata, giorno, crepuscolo, notte),
+dalla condizione meteo e dalla copertura nuvolosa. Sole e luna sono disegnati lungo i loro
+percorsi reali della giornata, con la temperatura appoggiata sull'orizzonte.
+
+Trascinando la **striscia oraria** (o usando le frecce da tastiera) il cielo cambia colore,
+il sole e la luna si spostano e tutti i valori mostrano la previsione per quell'ora.
+
+## Funzionalità
 
 | Funzionalità | Dettaglio |
 |---|---|
-| 🔍 **Ricerca città** | Autocomplete in tempo reale con Open-Meteo Geocoding |
-| 📍 **Geolocalizzazione** | Rilevamento automatico città all'avvio |
-| 🌡️ **Meteo attuale** | Temperatura, percepita, vento, umidità, visibilità |
-| 📅 **Previsioni 7 giorni** | Striscia drag-to-scroll con emoji meteo, max/min e probabilità pioggia |
-| 📊 **Grafico orario** | Temperatura, pioggia o vento ora per ora con tooltip personalizzati |
-| 🗺️ **Radar interattivo** | Mappa Leaflet con layer selezionabili (Pioggia / Temp / Vento / Nuvole) |
-| 🔁 **Toggle °C / °F** | Conversione al volo di tutte le temperature e velocità |
-| 🌙 **Tema chiaro/scuro** | Modalità dark (default) e light con transizioni fluide |
-| 🖼️ **Sfondo dinamico** | Immagini Pexels cambiate in base alle condizioni meteo |
-| 🕐 **Ora locale** | Ora corrente nella città cercata |
-| ☀️ **Indice UV** | Barra colorata con etichetta (Basso → Estremo) |
-| 📌 **Città recenti** | Ultime 5 città salvate nel localStorage |
-| 💀 **Skeleton loading** | Placeholder animati durante il caricamento |
+| 🔍 **Ricerca città** | Autocompletamento Open-Meteo, navigabile da tastiera (`/` porta alla ricerca) |
+| 📍 **Posizione** | Meteo per coordinate GPS, senza passare dal nome della città |
+| 🌅 **Cielo vivo** | Colori calcolati da sole, nuvole e meteo; stelle di notte; fase lunare reale |
+| 🕐 **Ora per ora** | Striscia delle 24 ore che ricolora il cielo (mouse, tocco, tastiera) |
+| 📅 **7 giorni** | Barre min/max su una **scala comune**, pioggia (% e mm), vento |
+| 📊 **Andamento orario** | Temperatura, precipitazioni e vento del giorno scelto (Chart.js) |
+| 🗺️ **Radar** | Mappa Leaflet con livelli pioggia / nuvole / temperatura / vento |
+| 🌬️ **Qualità dell'aria** | Indice europeo EAQI con PM2.5, PM10, NO₂, O₃ |
+| ☀️ **UV, sole e luna** | Scala UV OMS, alba/tramonto nell'ora locale della città, fase e illuminazione lunare |
+| 💡 **Da sapere oggi** | Avvisi pratici su UV, aria, pioggia, vento, freddo e caldo |
+| ⭐ **Preferiti** | Salvati sul server per l'utente registrato (JWT), sessione ripristinata al refresh |
+| 🔁 **Unità** | Metriche (°C, km/h, km, mm) o imperiali (°F, mph, mi, in) |
+| 🌗 **Tema** | Automatico (segue il cielo della città), chiaro o scuro |
+| 🌍 **6 lingue** | Italiano, English, Français, Deutsch, Español, 日本語 (anche i messaggi d'errore) |
+| 🖼️ **Foto Pexels** | Foto legata alla condizione meteo, fusa nel cielo, con attribuzione al fotografo |
 
----
+## 🛠️ Stack
 
-## 🛠️ Stack Tecnologico
+**Backend** — Java 17+, Spring Boot 3.5 (Web, Validation, Security, Data JPA, Cache),
+Caffeine, H2, JJWT 0.12, RestClient.
 
-### Backend
-| Tecnologia | Versione | Utilizzo |
+**Frontend** — React 19, Vite 5, i18next, Chart.js, React Leaflet, Lucide, Archivo (font variabile, ospitato localmente).
+
+**API esterne** — [OpenWeatherMap](https://openweathermap.org/api) (meteo attuale, tile radar),
+[Open-Meteo](https://open-meteo.com) (ricerca città, previsioni, qualità dell'aria),
+[Pexels](https://www.pexels.com/api/) (foto, facoltativa), [OpenStreetMap](https://www.openstreetmap.org/copyright) (mappa base).
+
+## 🔌 API del backend
+
+| Metodo | Endpoint | Note |
 |---|---|---|
-| Java | 17 | Runtime |
-| Spring Boot | 3.2.5 | Framework REST |
-| Spring Web (RestClient) | 3.2.5 | Chiamate HTTP verso API esterne |
-| Spring Cache | 3.2.5 | Cache in-memory delle risposte API |
+| GET | `/api/weather?city=Roma,IT` oppure `?lat=&lon=` | `lang` facoltativo (it, en, fr, de, es, ja) |
+| GET | `/api/coordinates?city=` | Suggerimenti per l'autocompletamento |
+| GET | `/api/forecast?lat=&lon=` | 7 giorni + orario, fuso orario della città |
+| GET | `/api/air-quality?lat=&lon=` | EAQI, UV e inquinanti |
+| GET | `/api/reverse-geocode?lat=&lon=` | |
+| GET | `/api/background?condition=rain&night=false` | Foto Pexels ridotte ai campi utili |
+| GET | `/api/tiles/{layer}/{z}/{x}/{y}.png` | Proxy delle tile radar: la chiave OWM resta sul server |
+| POST | `/api/auth/register`, `/api/auth/login` | Rispondono con token JWT e utente |
+| GET | `/api/auth/me` | Ripristina la sessione dal token |
+| GET/POST/DELETE | `/api/user/favorites` | Max 10 città, richiede il token |
 
-### Frontend
-| Tecnologia | Versione | Utilizzo |
-|---|---|---|
-| React | 19 | UI framework |
-| Vite | 5 | Build tool & dev server |
-| Framer Motion | 12 | Animazioni e transizioni |
-| Chart.js + react-chartjs-2 | 4 / 5 | Grafico orario |
-| React Leaflet + Leaflet | 5 / 1.9 | Mappa radar |
-| Lucide React | 1.16 | Icone UI |
-| Axios | 1.x | HTTP client |
+Gli errori hanno sempre la forma `{ "status": 404, "code": "CITY_NOT_FOUND", "error": "..." }`:
+il frontend traduce `code` nella lingua dell'utente.
 
-### API Esterne
-| API | Piano | Utilizzo |
-|---|---|---|
-| [OpenWeatherMap](https://openweathermap.org/api) | Gratuito | Meteo attuale, geolocalizzazione inversa, tile mappa |
-| [Open-Meteo](https://open-meteo.com) | Gratuito | Previsioni 7 giorni + dati orari + geocoding |
-| [Pexels](https://www.pexels.com/api/) | Gratuito | Immagini di sfondo dinamiche |
+## 🔒 Sicurezza
 
----
+- Le chiavi API non arrivano mai al browser (anche le tile radar passano dal backend).
+- Parametri validati (coordinate, lingua, lunghezze, layer della mappa); URL costruiti senza concatenare input.
+- Password con BCrypt, login limitato a 10 tentativi falliti per IP ogni 15 minuti.
+- Segreto JWT da variabile d'ambiente; senza, chiave casuale a ogni avvio.
+- Risposte `401`/`403` in JSON, nessun dettaglio interno negli errori, header di sicurezza attivi.
+- Console H2 disponibile solo con il profilo `dev`.
+- Cache con scadenza: meteo 10 min, previsioni e aria 30 min, ricerche 24 h.
 
-## 📁 Struttura del Progetto
+## 📁 Struttura
 
 ```
 weather-app/
-├── frontend/                          # App React (Vite)
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── WeatherCard.jsx        # Card meteo attuale + icone SVG animate
-│   │   │   ├── ForecastStrip.jsx      # Striscia previsioni 7 giorni
-│   │   │   ├── HourlyChart.jsx        # Grafico orario interattivo
-│   │   │   ├── GeoPanel.jsx           # Alba, tramonto, pressione, UV
-│   │   │   ├── LocalPanel.jsx         # Ora locale + mappa radar
-│   │   │   ├── SearchBar.jsx          # Ricerca con autocomplete
-│   │   │   ├── RecentCities.jsx       # Chip città recenti
-│   │   │   ├── WeatherIcon.jsx        # Icone SVG animate per condizione meteo
-│   │   │   └── SkeletonLoader.jsx     # Skeleton loading 3 colonne
-│   │   ├── hooks/
-│   │   │   └── useWeatherData.js      # Custom hook per fetch dati
-│   │   ├── utils/
-│   │   │   └── weatherHelpers.js      # Helper: temp, vento, UV, date
-│   │   ├── App.jsx                    # Orchestratore (stato globale)
-│   │   ├── index.css                  # Design system completo
-│   │   └── main.jsx                   # Entry point
-│   ├── vite.config.js                 # Config Vite + proxy → backend
-│   └── package.json
+├── frontend/src/
+│   ├── api/client.js            # axios + token + codici d'errore
+│   ├── auth/                    # AuthProvider, useAuth
+│   ├── components/
+│   │   ├── sky/                 # SkyHero, SkyChart, HourScrubber, MoonDisc, EmptyHero
+│   │   ├── panels/              # Settimana, grafico, radar, aria, sole/luna, dettagli, consigli
+│   │   ├── top/                 # Ricerca, impostazioni, città salvate
+│   │   └── AuthDialog.jsx       # <dialog> nativo per accesso e registrazione
+│   ├── hooks/                   # useWeatherData, useFavorites, useBackgroundPhoto, ...
+│   ├── utils/
+│   │   ├── sky.js               # colore del cielo + contrasto garantito del testo
+│   │   ├── astro.js             # posizione di sole e luna, fase lunare
+│   │   ├── timeline.js          # ore e giorni nel fuso della città
+│   │   └── weather.js           # unità, codici WMO, scale EAQI e UV
+│   ├── locales/                 # it, en, fr, de, es, ja
+│   └── index.css                # design system "Cielo vivo"
 │
-├── src/main/java/com/weatherapp/      # Backend Spring Boot
-│   ├── WeatherApplication.java        # Entry point Spring Boot
-│   ├── WeatherController.java         # REST endpoints (/api/*)
-│   ├── WeatherService.java            # Logica chiamate API esterne + cache
-│   ├── WeatherException.java          # Eccezione custom HTTP
-│   ├── ApiException.java              # Eccezione per errori API esterne
-│   └── GlobalExceptionHandler.java    # @ControllerAdvice per errori HTTP
-│
-├── src/main/resources/
-│   └── application.properties         # API keys e configurazione (NON in Git)
-│
-├── src/test/java/com/weatherapp/
-│   └── WeatherServiceTest.java        # Test JUnit 5
-│
-├── pom.xml                            # Maven + frontend-maven-plugin
-└── README.md
+└── src/main/java/com/weatherapp/
+    ├── config/                  # Security, Cache (Caffeine), Web
+    ├── controller/              # Weather, Auth, User
+    ├── service/                 # WeatherService, UserService
+    ├── security/                # JwtService, JwtAuthFilter, LoginAttemptService
+    ├── exception/               # ErrorCode, eccezioni, GlobalExceptionHandler
+    ├── model/ · dto/ · repository/
 ```
 
----
-
-## 🚀 Installazione e Avvio
+## 🚀 Avvio
 
 ### Prerequisiti
-- **Java 17+**
-- **Maven 3.8+**
-- **Node.js 20+** (solo per sviluppo frontend separato)
+- Java 17+ e Maven 3.9+ (il repository include un Maven portatile in `.maven/`)
+- Node.js 20+ solo per sviluppare il frontend separatamente
 
-### 1. Clona il repository
+### 1. Chiavi API
 
-```bash
-git clone https://github.com/Vincenzogr/Weather-app.git
-cd Weather-app
-```
-
-### 2. Configura le API Key
-
-Crea/modifica il file `src/main/resources/application.properties`:
+Imposta le variabili d'ambiente, oppure crea `src/main/resources/application-secret.properties`
+(già escluso da Git):
 
 ```properties
-# OpenWeatherMap — https://openweathermap.org/api
-openweathermap.api.key=LA_TUA_KEY_QUI
-
-# Pexels — https://www.pexels.com/api/
-pexels.api.key=LA_TUA_KEY_QUI
+openweathermap.api.key=LA_TUA_KEY
+pexels.api.key=LA_TUA_KEY        # facoltativa
 ```
 
-> ⚠️ **Non committare mai le API key.** Il file è già in `.gitignore`.
+Per la produzione imposta anche `JWT_SECRET` (almeno 32 caratteri).
 
-### 3a. Avvio completo (Build + Backend)
+### 2. Avvio completo
 
 ```bash
 mvn spring-boot:run
 ```
 
-Il plugin Maven scarica Node.js, esegue `npm install` e `npm run build` automaticamente,
-poi avvia il backend su `http://localhost:8080`.
+Maven installa Node, esegue `npm ci` e `npm run build`, poi avvia il server su `http://localhost:8080`.
+Utenti e preferiti sono salvati in `./data/` (H2 su file).
 
-### 3b. Sviluppo Frontend separato
-
-In un terminale, avvia il backend:
+### 3. Sviluppo con hot reload
 
 ```bash
-mvn spring-boot:run -Pskip-frontend
-# oppure avvialo dall'IDE
+mvn spring-boot:run -Dskip.npm -Dskip.installnodenpm -Dspring-boot.run.profiles=dev
 ```
-
-In un altro terminale, avvia Vite (hot-reload):
 
 ```bash
-cd frontend
-npm install
-npm run dev
-# → http://localhost:5173 (proxy → http://localhost:8080)
+npm --prefix frontend run dev
 ```
 
----
+Il frontend gira su `http://localhost:5173` e inoltra `/api` al backend.
 
-## 🧪 Test
+> **Windows con antivirus o proxy che ispeziona l'HTTPS:** se Java risponde
+> `PKIX path building failed`, avvia la JVM con l'archivio certificati di Windows:
+> `-Djavax.net.ssl.trustStoreType=Windows-ROOT` (anche in `MAVEN_OPTS`).
+
+## 🧪 Qualità
 
 ```bash
 mvn test
 ```
 
-Output atteso: tutti i test JUnit 5 in `WeatherServiceTest.java` passano.
+```bash
+npm --prefix frontend run lint
+```
 
----
-
-## 🔒 Sicurezza
-
-- Le API key risiedono solo in `application.properties` (escluso da `.gitignore`)
-- Backend valida tutti i parametri prima di chiamare le API esterne
-- Nessuna chiave è mai esposta al frontend direttamente
-- Spring Cache evita chiamate ridondanti alle API esterne
-
----
-
-## 🎨 Design
-
-- **Dark mode** (default) e **Light mode** con transizione fluida
-- **Glassmorphism** con `backdrop-filter` e bordi semitrasparenti
-- **Font**: Inter (UI) + Outfit (numeri/display) da Google Fonts
-- **Icone meteo SVG** animate con CSS keyframes (sole rotante, pioggia, neve, fulmine...)
-- **Skeleton loading** durante il fetch dati
-- **Responsive**: layout 3 colonne → 2 colonne → 1 colonna
+24 test backend (servizio meteo con server HTTP simulato, validazione, autenticazione,
+preferiti, formato degli errori, header di sicurezza).
 
 ---
 
 ## 🤖 Uso responsabile dell'AI
 
-Parti di questo progetto sono state sviluppate con il supporto di strumenti AI (Claude di Anthropic e Antigravity IDE).
+Parti di questo progetto sono state sviluppate con il supporto di strumenti di intelligenza artificiale.
 Il codice generato è stato compreso, testato, modificato e documentato dallo sviluppatore.
 L'AI è stata usata come strumento di supporto all'apprendimento, non come sostituto della comprensione del codice.
 

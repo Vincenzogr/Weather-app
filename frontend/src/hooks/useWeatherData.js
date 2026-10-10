@@ -1,69 +1,83 @@
-import { useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import axios from 'axios';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { api, errorCode, isCanceled } from '../api/client';
+
+const STALE_AFTER_MS = 10 * 60 * 1000;
 
 /**
- * Custom hook for fetching weather data.
- * Returns { weather, forecast, loading, error, handleSearch }
+ * Carica meteo attuale, previsioni e qualità dell'aria per una città
+ * ({ city: "Roma,IT" }) o per coordinate ({ lat, lon }).
+ *
+ * - Una nuova ricerca annulla quella ancora in corso: nessun risultato vecchio
+ *   può sovrascrivere quello nuovo.
+ * - Previsioni e qualità dell'aria partono in parallelo dalle coordinate del meteo.
+ * - Al cambio lingua e al ritorno sulla scheda dopo 10 minuti i dati si aggiornano.
  */
-export function useWeatherData() {
-  const { i18n } = useTranslation();
-  const [weather,    setWeather]    = useState(null);
-  const [forecast,   setForecast]   = useState(null);
-  const [airQuality, setAirQuality] = useState(null);
-  const [loading,    setLoading]    = useState(false);
-  const [error,      setError]      = useState('');
+export function useWeatherData(lang) {
+  const [state, setState] = useState({ status: 'idle', data: null, error: null });
+  const controllerRef = useRef(null);
+  const queryRef = useRef(null);
 
-  const handleSearch = useCallback(async (cityName) => {
-    const city = (cityName || '').trim();
-    if (!city) return;
+  const load = useCallback(async (query) => {
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    queryRef.current = query;
+    const { signal } = controller;
 
-    setLoading(true);
-    setError('');
-    setWeather(null);
-    setForecast(null);
-    setAirQuality(null);
-
+    setState((prev) => ({ ...prev, status: 'loading', error: null }));
     try {
-      const lang = i18n.language || 'it';
-      // 1. Current weather (OWM)
-      const wRes = await axios.get(`/api/weather?city=${encodeURIComponent(city)}&lang=${lang}`);
-      setWeather(wRes.data);
+      const params = query.city ? { city: query.city, lang } : { lat: query.lat, lon: query.lon, lang };
+      const { data: weather } = await api.get('/weather', { params, signal });
+      const coords = { lat: weather.coord.lat, lon: weather.coord.lon };
 
-      // 2. Coordinates for Open-Meteo
-      const cityOnly = city.split(',')[0].trim();
-      const cRes = await axios.get(`/api/coordinates?city=${encodeURIComponent(cityOnly)}&lang=${lang}`);
-      const results = cRes.data.results;
-      if (!results || results.length === 0) {
-        throw new Error(`Città "${city}" non trovata nelle previsioni`);
-      }
-      const { latitude, longitude } = results[0];
+      const [forecast, air] = await Promise.allSettled([
+        api.get('/forecast', { params: coords, signal }),
+        api.get('/air-quality', { params: coords, signal }),
+      ]);
+      if (forecast.status === 'rejected') throw forecast.reason;
 
-      // 3. 7-day forecast (Open-Meteo)
-      const fRes = await axios.get(`/api/forecast?lat=${latitude}&lon=${longitude}`);
-      setForecast(fRes.data);
-
-      // 4. Air Quality (Open-Meteo)
-      try {
-        const aqiRes = await axios.get(`/api/air-quality?lat=${latitude}&lon=${longitude}`);
-        setAirQuality(aqiRes.data);
-      } catch (e) {
-        console.warn("Impossibile recuperare i dati AQI", e);
-      }
-
-      return wRes.data.name; // return canonical city name
-    } catch (err) {
-      const msg =
-        err.response?.data?.error ||
-        err.response?.data?.message ||
-        err.message ||
-        'Errore durante la ricerca della città.';
-      setError(msg);
+      setState({
+        status: 'success',
+        error: null,
+        data: {
+          weather,
+          forecast: forecast.value.data,
+          air: air.status === 'fulfilled' ? air.value.data : null,
+          loadedAt: Date.now(),
+        },
+      });
+      return weather;
+    } catch (error) {
+      if (isCanceled(error) || signal.aborted) return null;
+      setState((prev) => ({ ...prev, status: 'error', error: errorCode(error) }));
       return null;
-    } finally {
-      setLoading(false);
     }
-  }, [i18n.language]);
+  }, [lang]);
 
-  return { weather, forecast, airQuality, loading, error, handleSearch };
+  // Lingua cambiata: le descrizioni di OpenWeatherMap vanno richieste di nuovo.
+  const langRef = useRef(lang);
+  useEffect(() => {
+    if (langRef.current === lang) return;
+    langRef.current = lang;
+    if (queryRef.current) load(queryRef.current);
+  }, [lang, load]);
+
+  // Scheda tornata visibile con dati vecchi: aggiorna in silenzio.
+  const loadedAt = state.data?.loadedAt;
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && queryRef.current && loadedAt
+          && Date.now() - loadedAt > STALE_AFTER_MS) {
+        load(queryRef.current);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [load, loadedAt]);
+
+  const retry = useCallback(() => {
+    if (queryRef.current) load(queryRef.current);
+  }, [load]);
+
+  return { ...state, load, retry };
 }
